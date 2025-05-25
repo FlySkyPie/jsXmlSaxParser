@@ -29,169 +29,159 @@
           Report the beginning of some internal and external XML entities.
 */
 
+export class DummyContentHandler {
+    constructor(div) {
 
-// Begin namespace
-(function () {
-    /* Private static helper function */
+        this.div = div;
+
+    }
+
+    // INTERFACE: ContentHandler: http://www.saxproject.org/apidoc/org/xml/sax/ContentHandler.html
+    // implemented in DefaultHandler, DefaultHandler2:
+    //  http://www.saxproject.org/apidoc/org/xml/sax/helpers/DefaultHandler.html and
+    //  http://www.saxproject.org/apidoc/org/xml/sax/ext/DefaultHandler2.html
+    startDocument() {
+        this.div.innerHTML += "startDocument<br/>";
+    }
+
+    startElement(namespaceURI, localName, qName, atts) {
+        this.div.innerHTML += "startElement [" + namespaceURI + "] [" + localName + "] [" + qName + "]<br/>";
+        this._displayAtts.call(this, atts);
+    }
+
+    endElement(namespaceURI, localName, qName) {
+        this.div.innerHTML += "endElement [" + namespaceURI + "] [" + localName + "] [" + qName + "]<br/>";
+    }
+
+    startPrefixMapping(prefix, uri) {
+        this.div.innerHTML += "startPrefixMapping [" + prefix + "] [" + uri + "]<br/>";
+    }
+
+    endPrefixMapping(prefix) {
+        this.div.innerHTML += "endPrefixMapping [" + prefix + "]<br/>";
+    }
+
+    processingInstruction(target, data) {
+        this.div.innerHTML += "processingInstruction [" + target + "] [" + data + "]<br/>";
+    }
+
+    ignorableWhitespace(ch, start, length) {
+        this.div.innerHTML += "ignorableWhitespace [" + ch + "] [" + start + "] [" + length + "]<br/>";
+    }
+
+    characters(ch, start, length) {
+        this.div.innerHTML += "characters [" + ch + "] [" + start + "] [" + length + "]<br/>";
+    }
+
+    skippedEntity(name) {
+        this.div.innerHTML += "skippedEntity [" + name + "]<br/>";
+    }
+
+    endDocument() {
+        this.div.innerHTML += "endDocument";
+    }
+
+    setDocumentLocator(locator) {
+        this.div.innerHTML += 'locator';
+    }
+
+    // INTERFACE: DeclHandler: http://www.saxproject.org/apidoc/org/xml/sax/ext/DeclHandler.html
+
+    attributeDecl(eName, aName, type, mode, value) {
+        this.div.innerHTML += "attributeDecl [" + eName + "] [" + aName + "] [" + type + "] [" + mode + "] [" + value + "]<br/>";
+    }
+
+    elementDecl(name, model) {
+        this.div.innerHTML += "elementDecl [" + name + "] [" + model + "]<br/>";
+    }
+
+    externalEntityDecl(name, publicId, systemId) {
+        this.div.innerHTML += "externalEntityDecl [" + name + "] [" + publicId + "] [" + systemId + "]<br/>";
+    }
+
+    internalEntityDecl(name, value) {
+        this.div.innerHTML += "internalEntityDecl [" + name + "] [" + value + "]<br/>";
+    }
+
+    // INTERFACE: LexicalHandler: http://www.saxproject.org/apidoc/org/xml/sax/ext/LexicalHandler.html
+
+    comment(ch, start, length) {
+        this.div.innerHTML += "comment [" + ch + "] [" + start + "] [" + length + "]<br/>";
+    }
+
+    endCDATA() {
+        this.div.innerHTML += "endCDATA<br/>";
+    }
+
+    endDTD() {
+        this.div.innerHTML += "endDTD<br/>";
+    }
+
+    endEntity(name) {
+        this.div.innerHTML += "endEntity [" + name + "]<br/>";
+    }
+
+    startCDATA() {
+        this.div.innerHTML += "startCDATA<br/>";
+    }
+
+    startDTD(name, publicId, systemId) {
+        this.div.innerHTML += "startDTD [" + name + "] [" + publicId + "] [" + systemId + "]<br/>";
+    }
+
+    startEntity(name) {
+        this.div.innerHTML += "startEntity [" + name + "]<br/>";
+    }
+
+    // INTERFACE: EntityResolver: http://www.saxproject.org/apidoc/org/xml/sax/EntityResolver.html
+    // Could implement this by checking for last two arguments missing in EntityResolver2 resolveEntity() below
+    // DummyContentHandler.prototype.resolveEntity = function (publicId, systemId) {};
+
+    // INTERFACE: EntityResolver2: http://www.saxproject.org/apidoc/org/xml/sax/ext/EntityResolver2.html
+    resolveEntity(name, publicId, baseURI, systemId) {
+        this.div.innerHTML += "resolveEntity [" + name + "] [" + publicId + "] [" + baseURI + "] [" + systemId + "]<br/>";
+    }
+
+    getExternalSubset(name, baseURI) {
+        this.div.innerHTML += "getExternalSubset [" + name + "] [" + baseURI + "]<br/>";
+    }
+
+    // INTERFACE: DTDHandler: http://www.saxproject.org/apidoc/org/xml/sax/DTDHandler.html
+    notationDecl(name, publicId, systemId) {
+        this.div.innerHTML += "name[" + name + "] [" + publicId + "] [" + systemId + "]<br/>";
+    }
+
+    unparsedEntityDecl(name, publicId, systemId, notationName) {
+        this.div.innerHTML += "name[" + name + "] [" + publicId + "] [" + systemId + "] [" + notationName + "]<br/>";
+    }
+
+    // INTERFACE: ErrorHandler: http://www.saxproject.org/apidoc/org/xml/sax/ErrorHandler.html
+    warning(saxParseException) {
+        this._serializeSaxParseException.call(this, saxParseException);
+    }
+
+    error(saxParseException) {
+        this._serializeSaxParseException.call(this, saxParseException);
+    }
+
+    fatalError(saxParseException) {
+        this._serializeSaxParseException.call(this, saxParseException);
+    }
+
 
     /* Private static helpers treated below as private instance methods, so don't need to add these to the public API; we might use a Relator to also get rid of non-standard public properties */
-    function _displayAtts (atts) {
-        for (let i = 0 ; i < atts.getLength() ; i++) {
+    _displayAtts(atts) {
+        for (let i = 0; i < atts.getLength(); i++) {
             this.div.innerHTML += "attribute [" + atts.getURI(i) + "] [" + atts.getLocalName(i) + "] [" + atts.getValue(i) + "]<br/>";
         }
     }
 
-    function _serializeSaxParseException (saxParseException) {
+    _serializeSaxParseException(saxParseException) {
         this.div.innerHTML += "invalid char : [" + saxParseException.ch + "] at index : " + saxParseException.index + "<br/>";
         this.div.innerHTML += "message is : [" + saxParseException.message + "]<br/>";
         if (saxParseException.exception) {
-            this.div.innerHTML += "wrapped exception is : [" + _serializeSaxParseException.call(this, saxParseException.exception) + "]<br/>";
+            this.div.innerHTML += "wrapped exception is : [" + this._serializeSaxParseException.call(this, saxParseException.exception) + "]<br/>";
         }
     }
 
-
-    class DummyContentHandler {
-        constructor(div) {
-            
-            this.div = div;
-            
-        }
-
-        // INTERFACE: ContentHandler: http://www.saxproject.org/apidoc/org/xml/sax/ContentHandler.html
-        // implemented in DefaultHandler, DefaultHandler2:
-        //  http://www.saxproject.org/apidoc/org/xml/sax/helpers/DefaultHandler.html and
-        //  http://www.saxproject.org/apidoc/org/xml/sax/ext/DefaultHandler2.html
-        startDocument() {
-            this.div.innerHTML += "startDocument<br/>";
-        }
-
-        startElement(namespaceURI, localName, qName, atts) {
-            this.div.innerHTML += "startElement [" + namespaceURI + "] [" + localName + "] [" + qName + "]<br/>";
-            _displayAtts.call(this, atts);
-        }
-
-        endElement(namespaceURI, localName, qName) {
-            this.div.innerHTML += "endElement [" + namespaceURI + "] [" + localName + "] [" + qName + "]<br/>";
-        }
-
-        startPrefixMapping(prefix, uri) {
-            this.div.innerHTML += "startPrefixMapping [" + prefix + "] [" + uri + "]<br/>";
-        }
-
-        endPrefixMapping(prefix) {
-            this.div.innerHTML += "endPrefixMapping [" + prefix + "]<br/>";
-        }
-
-        processingInstruction(target, data) {
-            this.div.innerHTML += "processingInstruction [" + target + "] [" + data + "]<br/>";
-        }
-
-        ignorableWhitespace(ch, start, length) {
-            this.div.innerHTML += "ignorableWhitespace [" + ch + "] [" + start + "] [" + length + "]<br/>";
-        }
-
-        characters(ch, start, length) {
-            this.div.innerHTML += "characters [" + ch + "] [" + start + "] [" + length + "]<br/>";
-        }
-
-        skippedEntity(name) {
-            this.div.innerHTML += "skippedEntity [" + name + "]<br/>";
-        }
-
-        endDocument() {
-            this.div.innerHTML += "endDocument";
-        }
-
-        setDocumentLocator(locator) {
-            this.div.innerHTML += 'locator';
-        }
-
-        // INTERFACE: DeclHandler: http://www.saxproject.org/apidoc/org/xml/sax/ext/DeclHandler.html
-
-        attributeDecl(eName, aName, type, mode, value) {
-            this.div.innerHTML += "attributeDecl [" + eName + "] [" + aName + "] [" + type + "] [" + mode + "] [" + value + "]<br/>";
-        }
-
-        elementDecl(name, model) {
-            this.div.innerHTML += "elementDecl [" + name + "] [" + model + "]<br/>";
-        }
-
-        externalEntityDecl(name, publicId, systemId) {
-            this.div.innerHTML += "externalEntityDecl [" + name + "] [" + publicId + "] [" + systemId + "]<br/>";
-        }
-
-        internalEntityDecl(name, value) {
-            this.div.innerHTML += "internalEntityDecl [" + name + "] [" + value + "]<br/>";
-        }
-
-        // INTERFACE: LexicalHandler: http://www.saxproject.org/apidoc/org/xml/sax/ext/LexicalHandler.html
-
-        comment(ch, start, length) {
-            this.div.innerHTML += "comment [" + ch + "] [" + start + "] [" + length + "]<br/>";
-        }
-
-        endCDATA() {
-            this.div.innerHTML += "endCDATA<br/>";
-        }
-
-        endDTD() {
-            this.div.innerHTML += "endDTD<br/>";
-        }
-
-        endEntity(name) {
-            this.div.innerHTML += "endEntity [" + name + "]<br/>";
-        }
-
-        startCDATA() {
-            this.div.innerHTML += "startCDATA<br/>";
-        }
-
-        startDTD(name, publicId, systemId) {
-            this.div.innerHTML += "startDTD [" + name + "] [" + publicId + "] [" + systemId + "]<br/>";
-        }
-
-        startEntity(name) {
-            this.div.innerHTML += "startEntity [" + name + "]<br/>";
-        }
-
-        // INTERFACE: EntityResolver: http://www.saxproject.org/apidoc/org/xml/sax/EntityResolver.html
-        // Could implement this by checking for last two arguments missing in EntityResolver2 resolveEntity() below
-        // DummyContentHandler.prototype.resolveEntity = function (publicId, systemId) {};
-
-        // INTERFACE: EntityResolver2: http://www.saxproject.org/apidoc/org/xml/sax/ext/EntityResolver2.html
-        resolveEntity(name, publicId, baseURI, systemId) {
-            this.div.innerHTML += "resolveEntity [" + name + "] [" + publicId + "] [" +baseURI + "] [" + systemId + "]<br/>";
-        }
-
-        getExternalSubset(name, baseURI) {
-            this.div.innerHTML += "getExternalSubset [" + name + "] [" + baseURI + "]<br/>";
-        }
-
-        // INTERFACE: DTDHandler: http://www.saxproject.org/apidoc/org/xml/sax/DTDHandler.html
-        notationDecl(name, publicId, systemId) {
-            this.div.innerHTML += "name[" + name + "] [" + publicId + "] [" + systemId + "]<br/>";
-        }
-
-        unparsedEntityDecl(name, publicId, systemId, notationName) {
-            this.div.innerHTML += "name[" + name + "] [" + publicId + "] [" + systemId + "] [" + notationName + "]<br/>";
-        }
-
-        // INTERFACE: ErrorHandler: http://www.saxproject.org/apidoc/org/xml/sax/ErrorHandler.html
-        warning(saxParseException) {
-            _serializeSaxParseException.call(this, saxParseException);
-        }
-
-        error(saxParseException) {
-            _serializeSaxParseException.call(this, saxParseException);
-        }
-
-        fatalError(saxParseException) {
-            _serializeSaxParseException.call(this, saxParseException);
-        }
-    }
-
-
-
-    // EXPORT
-    this.DummyContentHandler = DummyContentHandler;
-}());
+}
