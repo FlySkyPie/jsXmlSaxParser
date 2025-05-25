@@ -1,9 +1,18 @@
-/*global window, document, XMLHttpRequest, ActiveXObject, AnyName, Attribute, AttributeNode, Choice, Context, DatatypeLibrary, Element, ElementNode, Empty, Group, NOT_CHAR, 
-Name, NotAllowed, OneOrMore, QName, SAXScanner, Text , TextNode, ValidatorFunctions, XMLFilterImpl2, NamespaceSupport, InputSource, StringReader, Attributes2Impl, AttributesImpl */
 import { ReaderWrapper } from './ReaderWrapper';
 import {
-    Interleave, Datatype, Param, Data, Value, DataExcept,MissingContent,
+    Interleave, Datatype, Param, Data, Value, DataExcept, MissingContent,
+    Context, AnyName, Attribute, AttributeNode, Choice,
+    Element, ElementNode, Empty, Group, Name, NotAllowed,
+    OneOrMore, QName, Text, TextNode,
 } from './validation_common/validator_objects';
+import { ValidatorFunctions } from './validation_common/validator_functions';
+import { DatatypeLibrary } from './jsdatatypelibrary-0.4/datatype_library';
+import { NamespaceSupport } from './NamespaceSupport';
+import { InputSource } from './InputSource';
+import { StringReader } from './Reader';
+import { XMLFilterImpl2 } from './XMLFilterImpls';
+import { SAXScanner } from './SAXScanner';
+import { Attributes2Impl, AttributesImpl } from './AttributesImpl';
 
 let that = window; // probably window object
 
@@ -131,7 +140,7 @@ export class SAXParser {
         this.errorHandler = errorHandler;
         this.entityResolver = entityResolver || null;
 
-        if (typeof that.AttributesImpl !== 'function') {
+        if (typeof AttributesImpl !== 'function') {
             throw new SAXException("you must import an implementation of AttributesImpl, like AttributesImpl.js, in the html");
         }
 

@@ -1,5 +1,3 @@
-/*global ActiveXObject, window, document */
-
 /* sax 2 methods
  void 	attributeDecl(java.lang.String eName, java.lang.String aName, java.lang.String type, java.lang.String mode, java.lang.String value)
           Report an attribute type declaration.

@@ -1,5 +1,4 @@
-/*global window, ReaderWrapper */
-class ReaderWrapper {
+export class ReaderWrapper {
     constructor(reader) {
         this.reader = reader;
         this.peeked = [];
@@ -22,7 +21,8 @@ class ReaderWrapper {
     }
 
     skip(n) {
-        for (var i = 0; this.peeked.length !== 0 && i < n; i++) {
+        let i;
+        for (i = 0; this.peeked.length !== 0 && i < n; i++) {
             this.peeked.pop();
         }
         n -= i;
@@ -38,7 +38,7 @@ class ReaderWrapper {
     */
     next() {
         if (this.peeked.length !== 0) {
-             return this.peeked.pop();
+            return this.peeked.pop();
         }
         return this.reader.read();
     }
@@ -51,7 +51,7 @@ class ReaderWrapper {
     peek() {
         let peekedLen = this.peeked.length;
         if (peekedLen !== 0) {
-             return this.peeked[peekedLen - 1];
+            return this.peeked[peekedLen - 1];
         }
         let returned = this.reader.read();
         this.peeked[0] = returned;
@@ -146,11 +146,11 @@ class ReaderWrapper {
     if next char is ch
     */
     matchChar(ch) {
-       if (this.equals(ch)) {
-           this.next();
-           return true;
-       }
-       return false;
+        if (this.equals(ch)) {
+            this.next();
+            return true;
+        }
+        return false;
     }
 
     /*
@@ -165,11 +165,11 @@ class ReaderWrapper {
     }
 
     equals(ch) {
-          return ch === this.peek();
+        return ch === this.peek();
     }
 
     unequals(ch) {
-          return ch !== this.peek();
+        return ch !== this.peek();
     }
 
     unread(str) {

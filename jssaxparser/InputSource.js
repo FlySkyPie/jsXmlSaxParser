@@ -1,3 +1,5 @@
+import { Reader } from './Reader';
+
 // http://java.sun.com/j2se/1.4.2/docs/api/org/xml/sax/InputSource.html
 // Could put in org.xml.sax namespace
 
@@ -6,7 +8,7 @@
 // systemId (file URL)); note that resolveEntity() on EntityResolver and also getExternalSubset() on EntityResolver2 return
 // an InputSource and Locator and Locator2 also have notes on InputSource
 
-class InputSource {
+export class InputSource {
     constructor(input) {
         if (!input) {
             return;
@@ -14,7 +16,7 @@ class InputSource {
         if (typeof input === 'string') {
             this.systemId = input;
         }
-        else if (input instanceof InputStream) {
+        else if (window.InputStream && input instanceof InputStream) {
             this.byteStream = input;
         }
         else if (input instanceof Reader) { // Should not have a byte-order mark

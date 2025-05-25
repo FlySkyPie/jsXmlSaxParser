@@ -8,6 +8,7 @@ export default defineConfig([
             'prefer-arrow-callback': 'warn',
             'no-undef': 'warn',
             'no-unused-vars': 'warn',
+            'no-invalid-this': 'warn',
             // semi: "error",
             // "prefer-const": "error",
         },

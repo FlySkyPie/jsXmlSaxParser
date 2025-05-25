@@ -1,5 +1,3 @@
-/*global SAXParseException */
-
 // Overridable handlers which ignore all parsing events (though see resolveEntity() and fatalError())
 
 // http://www.saxproject.org/apidoc/org/xml/sax/helpers/DefaultHandler.html

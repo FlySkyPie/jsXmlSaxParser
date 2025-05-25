@@ -1,5 +1,4 @@
-/*global SAXNotSupportedException */
-
+import { SAXNotSupportedException } from './sax';
 
 /* Supporting functions and exceptions */
 /*

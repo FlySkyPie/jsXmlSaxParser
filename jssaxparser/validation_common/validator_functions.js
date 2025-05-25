@@ -1,7 +1,14 @@
+import {
+    After, AnyName, AnyNameExcept, Attribute, Choice, Data,
+    DataExcept, Element, ElementNode, Empty, Group, Interleave, List,
+    MissingContent, Name, NameClassChoice, NotAllowed, NsName, NsNameExcept, OneOrMore,
+    Text, TextNode, Value,
+} from './validator_objects';
+
 /*
 that is the implementation of the following algorithm : http://www.thaiopensource.com/relaxng/derivative.html
 */
-class ValidatorFunctions {
+export class ValidatorFunctions {
     constructor(relaxNGValidator, datatypeLibrary) {
         this.relaxNGValidator = relaxNGValidator;
         this.datatypeLibrary = datatypeLibrary;
@@ -85,7 +92,7 @@ class ValidatorFunctions {
             return true;
         } else if (pattern instanceof After) {
             return false;
-        } 
+        }
         throw new Error('Unexpected result for ValidatorFunctions.nullable() ' + pattern);
     }
 
@@ -422,7 +429,7 @@ class ValidatorFunctions {
                 return x;
             }
         } else if (pattern instanceof After) {
-            p1Deriv = this.startTagOpenDeriv(pattern.pattern1, qName, childNode);		
+            p1Deriv = this.startTagOpenDeriv(pattern.pattern1, qName, childNode);
             return this.applyAfter(new flip(this.after, pattern.pattern2), p1Deriv);
         } else if (pattern instanceof NotAllowed) {
             return pattern;

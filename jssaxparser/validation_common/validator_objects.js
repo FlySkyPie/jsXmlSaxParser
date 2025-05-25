@@ -523,11 +523,11 @@ export class ElementNode {
 
     toHTML() {
         let string = "<table><tr><th>ElementNode</th></tr><tr><td>qName</td><td>" + this.qName.toHTML() + "</td></tr><tr><td>context</td><td>" + this.context.toHTML() + "</td></tr><tr><td>attributeNodes</td><td><table>";
-        for (var i in this.attributeNodes) {
+        for (let i in this.attributeNodes) {
             string += "<tr><td>" + this.attributeNodes[i].toHTML() + "</td></tr>";
         }
         string += "</table></td></tr><tr><td>childNodes</td><td><table>";
-        for (var i = 0; i < this.childNodes.length; i++) {
+        for (let i = 0; i < this.childNodes.length; i++) {
             string += "<tr><td>" + this.childNodes[i].toHTML() + "</td></tr>";
         }
         string += "</table>";

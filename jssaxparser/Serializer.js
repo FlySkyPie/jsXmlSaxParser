@@ -1,5 +1,3 @@
-/*global ActiveXObject, window, document */
-
 export class Serializer {
     constructor() {
         this.warnSaxParseExceptions = [];
@@ -23,11 +21,11 @@ export class Serializer {
     startElement(namespaceURI, localName, qName, atts) {
         this.string += '<' + qName;
         //adds namespace attributes
-        for (var i in this.currentPrefixMapping) {
+        for (let i in this.currentPrefixMapping) {
             this.string += ' xmlns:' + i + '="' + this.currentPrefixMapping[i] + '"'; // .toLowerCase()
         }
         this.currentPrefixMapping = {};
-        for (i = 0; i < atts.getLength(); i++) {
+        for (let i = 0; i < atts.getLength(); i++) {
             let value = atts.getValue(i);
             value = value.replace(/\n/g, "&#10;");
             value = value.replace(/\r/g, "&#13;");

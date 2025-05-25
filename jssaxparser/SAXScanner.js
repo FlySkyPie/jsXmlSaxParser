@@ -1,7 +1,7 @@
-/*global window, AttributesImpl, SAXParseException, SAXParser */
 import { ReaderWrapper } from './ReaderWrapper';
 import { StringReader } from './Reader';
 import { NamespaceSupport } from './NamespaceSupport';
+import { SAXParseException } from './sax';
 
 /*
 This is the private API for SAX parsing
