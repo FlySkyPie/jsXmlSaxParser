@@ -105,13 +105,13 @@ ValidatorFunctions.prototype.childDeriv = function(context, pattern, childNode) 
         return this.textDeriv(context, pattern, childNode.string, childNode);
     } else if (childNode instanceof ElementNode) {
         this.debug("beginning validation of childNode", pattern, childNode);
-        var p1 = this.startTagOpenDeriv(pattern, childNode.qName, childNode);
+        let p1 = this.startTagOpenDeriv(pattern, childNode.qName, childNode);
         this.debug("validation of attributes", p1, childNode);
-        var p2 = this.attsDeriv(childNode.context, p1, cloneArray(childNode.attributeNodes));
+        let p2 = this.attsDeriv(childNode.context, p1, cloneArray(childNode.attributeNodes));
         this.debug("ending validation of childNode", p2, childNode);
-        var p3 = this.startTagCloseDeriv(p2, childNode);
+        let p3 = this.startTagCloseDeriv(p2, childNode);
         this.debug("validation of children nodes", p3, childNode);
-        var p4 = this.childrenDeriv(childNode.context, p3, cloneArray(childNode.childNodes));
+        let p4 = this.childrenDeriv(childNode.context, p3, cloneArray(childNode.childNodes));
         this.debug("end of validation", p4, childNode);
         return this.endTagDeriv(p4, childNode);
     }
@@ -139,7 +139,7 @@ ValidatorFunctions.prototype.childDeriv = function(context, pattern, childNode) 
     textDeriv _ _ _ = NotAllowed
     */
 ValidatorFunctions.prototype.textDeriv = function(context, pattern, string, childNode) {
-    var choice1, choice2, group1;
+    let choice1, choice2, group1;
     if (pattern instanceof Choice) {
         choice1 = this.textDeriv(context, pattern.pattern1, string, childNode);
         choice2 = this.textDeriv(context, pattern.pattern2, string, childNode);
@@ -150,7 +150,7 @@ ValidatorFunctions.prototype.textDeriv = function(context, pattern, string, chil
         return this.choice(choice1, choice2);
     } else if (pattern instanceof Group) {
         group1 = this.textDeriv(context, pattern.pattern1, string, childNode);
-        var p = this.group(group1, pattern.pattern2);
+        let p = this.group(group1, pattern.pattern2);
         if (this.nullable(pattern.pattern1)) {
             choice2 = this.textDeriv(context, pattern.pattern1, string, childNode);
             return this.choice(p, choice2);
@@ -158,11 +158,11 @@ ValidatorFunctions.prototype.textDeriv = function(context, pattern, string, chil
             return p;
         }
     } else if (pattern instanceof After) {
-        var after1 = this.textDeriv(context, pattern.pattern1, string, childNode);
+        let after1 = this.textDeriv(context, pattern.pattern1, string, childNode);
         return this.after(after1, pattern.pattern2);
     } else if (pattern instanceof OneOrMore) {
         group1 = this.textDeriv(context, pattern.pattern, string, childNode);
-        var group2 = this.choice(pattern, new Empty());
+        let group2 = this.choice(pattern, new Empty());
         return this.group(group1, group2);
     } else if (pattern instanceof Text) {
         return pattern;
@@ -171,14 +171,14 @@ ValidatorFunctions.prototype.textDeriv = function(context, pattern, string, chil
     } else if (pattern instanceof Data) {
         return this.datatypeAllows(pattern.datatype, pattern.paramList, string, context);
     } else if (pattern instanceof DataExcept) {
-        var datatypeAllowed = this.datatypeAllows(pattern.datatype, pattern.paramList, string, context);
+        let datatypeAllowed = this.datatypeAllows(pattern.datatype, pattern.paramList, string, context);
         if (datatypeAllowed instanceof Empty && !this.nullable(this.textDeriv(context, pattern.pattern, string, childNode))) {
             return new Empty();
         } else {
             return new NotAllowed("data invalid, found [" + string + "]", pattern, childNode);
         }
     } else if (pattern instanceof List) {
-        var listDeriv = this.listDeriv(context, pattern.pattern, this.words(string), childNode);
+        let listDeriv = this.listDeriv(context, pattern.pattern, this.words(string), childNode);
         if (this.nullable(listDeriv, childNode)) {
             return new Empty();
         } else {
@@ -392,7 +392,7 @@ ValidatorFunctions.prototype.applyAfter = function(funct, pattern) {
     startTagOpenDeriv _ qn = NotAllowed
     */
 ValidatorFunctions.prototype.startTagOpenDeriv = function(pattern, qName, childNode) {
-    var choice1, choice2, p1Deriv, p2Deriv;
+    let choice1, choice2, p1Deriv, p2Deriv;
     if (pattern instanceof Choice) {
         choice1 = this.startTagOpenDeriv(pattern.pattern1, qName, childNode);
         choice2 = this.startTagOpenDeriv(pattern.pattern2, qName, childNode);
@@ -410,11 +410,11 @@ ValidatorFunctions.prototype.startTagOpenDeriv = function(pattern, qName, childN
         choice2 = this.applyAfter(new notFlip(this.interleave, pattern.pattern1), p2Deriv);
         return this.choice(choice1, choice2);
     } else if (pattern instanceof OneOrMore) {
-        var pDeriv = this.startTagOpenDeriv(pattern.pattern, qName, childNode);
+        let pDeriv = this.startTagOpenDeriv(pattern.pattern, qName, childNode);
         return this.applyAfter(new flip(this.group, this.choice(pattern, new Empty())), pDeriv);
     } else if (pattern instanceof Group) {
         p1Deriv = this.startTagOpenDeriv(pattern.pattern1, qName, childNode);
-        var x = this.applyAfter(new flip(this.group, pattern.pattern2), p1Deriv);
+        let x = this.applyAfter(new flip(this.group, pattern.pattern2), p1Deriv);
         if (this.nullable(pattern.pattern1)) {
             p2Deriv = this.startTagOpenDeriv(pattern.pattern2, qName, childNode);
             return this.choice(x, p2Deriv);
@@ -459,8 +459,8 @@ ValidatorFunctions.prototype.attsDeriv = function(context, pattern, attributeNod
     if (attributeNodes.length === 0) {
         return pattern;
     } else {
-        var attDerivResult = this.attDeriv(context, pattern, attributeNodes.pop());
-        var attsDerivResult = this.attsDeriv(context, attDerivResult, attributeNodes);
+        let attDerivResult = this.attDeriv(context, pattern, attributeNodes.pop());
+        let attsDerivResult = this.attsDeriv(context, attDerivResult, attributeNodes);
         return attsDerivResult;
     }
 };
@@ -484,7 +484,7 @@ ValidatorFunctions.prototype.attsDeriv = function(context, pattern, attributeNod
     attDeriv _ _ _ = NotAllowed
     */
 ValidatorFunctions.prototype.attDeriv = function(context, pattern, attributeNode) {
-    var choice1, choice2, attDeriv1, attDeriv2;
+    let choice1, choice2, attDeriv1, attDeriv2;
     if (pattern instanceof After) {
         var attDerivResult = this.attDeriv(context, pattern.pattern1, attributeNode);
         return this.after(attDerivResult, pattern.pattern2);
@@ -508,9 +508,9 @@ ValidatorFunctions.prototype.attDeriv = function(context, pattern, attributeNode
         attDerivResult = this.attDeriv(context, pattern.pattern, attributeNode);
         return this.group(attDerivResult, this.choice(pattern.pattern, new Empty()));
     } else if (pattern instanceof Attribute) {
-        var attributeNameCheck = this.contains(pattern.nameClass, attributeNode.qName);
+        let attributeNameCheck = this.contains(pattern.nameClass, attributeNode.qName);
         if (attributeNameCheck) {
-            var valueMatched = this.valueMatch(context, pattern.pattern, attributeNode.string, attributeNode);
+            let valueMatched = this.valueMatch(context, pattern.pattern, attributeNode.string, attributeNode);
             // AUGMENTATION : the AttributeNode is typed
             if (valueMatched instanceof Empty && (pattern.pattern instanceof Data || pattern.pattern instanceof DataExcept)) {
                 attributeNode.setType(pattern.pattern.datatype.localName);
@@ -531,12 +531,12 @@ ValidatorFunctions.prototype.attDeriv = function(context, pattern, attributeNode
     valueMatch cx p s = (nullable p && whitespace s) || nullable (textDeriv cx p s)
     */
 ValidatorFunctions.prototype.valueMatch = function(context, pattern, string, childNode) {
-    var nullable = this.nullable(pattern);
-    var isWhitespace = this.whitespace(string);
+    let nullable = this.nullable(pattern);
+    let isWhitespace = this.whitespace(string);
     if (nullable && isWhitespace) {
         return true;
     }
-    var textDerivResult = this.textDeriv(context, pattern, string, childNode);
+    let textDerivResult = this.textDeriv(context, pattern, string, childNode);
     //in order to keep original NotAllowed pattern
     if (this.nullable(textDerivResult)) {
         return new Empty();
@@ -564,16 +564,16 @@ ValidatorFunctions.prototype.startTagCloseDeriv = function(pattern, childNode) {
     if (pattern instanceof After) {
         return this.after(this.startTagCloseDeriv(pattern.pattern1, childNode), pattern.pattern2);
     } else if (pattern instanceof Choice) {
-        var choice1 = this.startTagCloseDeriv(pattern.pattern1, childNode);
-        var choice2 = this.startTagCloseDeriv(pattern.pattern2, childNode);
+        let choice1 = this.startTagCloseDeriv(pattern.pattern1, childNode);
+        let choice2 = this.startTagCloseDeriv(pattern.pattern2, childNode);
         return this.choice(choice1, choice2);
     } else if (pattern instanceof Group) {
-        var group1 = this.startTagCloseDeriv(pattern.pattern1, childNode);
-        var group2 = this.startTagCloseDeriv(pattern.pattern2, childNode);
+        let group1 = this.startTagCloseDeriv(pattern.pattern1, childNode);
+        let group2 = this.startTagCloseDeriv(pattern.pattern2, childNode);
         return this.group(group1, group2);
     } else if (pattern instanceof Interleave) {
-        var interleave1 = this.startTagCloseDeriv(pattern.pattern1, childNode);
-        var interleave2 = this.startTagCloseDeriv(pattern.pattern2, childNode);
+        let interleave1 = this.startTagCloseDeriv(pattern.pattern1, childNode);
+        let interleave2 = this.startTagCloseDeriv(pattern.pattern2, childNode);
         return this.interleave(interleave1, interleave2);
     } else if (pattern instanceof OneOrMore) {
         return this.oneOrMore(this.startTagCloseDeriv(pattern.pattern, childNode));
@@ -613,7 +613,7 @@ ValidatorFunctions.prototype.childrenDeriv = function(context, pattern, childNod
     if (childNodes.length === 0) {
         return pattern;
     } else if (childNodes.length === 1 && childNodes[0] instanceof TextNode) {
-        var p1 = this.childDeriv(context, pattern, childNodes[0]);
+        let p1 = this.childDeriv(context, pattern, childNodes[0]);
         if (this.whitespace(childNodes[0].string)) {
             return this.choice(pattern, p1);
         } else {
@@ -634,9 +634,9 @@ ValidatorFunctions.prototype.stripChildrenDeriv = function(context, pattern, chi
     if (childNodes.length === 0) {
         return pattern;
     } else {
-        var p = pattern;
-        var childNodesCloned = cloneArray(childNodes);
-        var childNode = childNodesCloned.pop();
+        let p = pattern;
+        let childNodesCloned = cloneArray(childNodes);
+        let childNode = childNodesCloned.pop();
         if (!this.strip(childNode)) {
             p = this.childDeriv(context, p, childNode);
         }
@@ -673,8 +673,8 @@ ValidatorFunctions.prototype.whitespace = function(string) {
     */
 ValidatorFunctions.prototype.endTagDeriv = function(pattern, childNode) {
     if (pattern instanceof Choice) {
-        var choice1 = this.endTagDeriv(pattern.pattern1, childNode);
-        var choice2 = this.endTagDeriv(pattern.pattern2, childNode);
+        let choice1 = this.endTagDeriv(pattern.pattern1, childNode);
+        let choice2 = this.endTagDeriv(pattern.pattern2, childNode);
         return this.choice(choice1, choice2);
     } else if (pattern instanceof After) {
         if (this.nullable(pattern.pattern1)) {

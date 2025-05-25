@@ -2,7 +2,7 @@
 Name, NotAllowed, OneOrMore, QName, SAXScanner, Text , TextNode, ValidatorFunctions, XMLFilterImpl2, NamespaceSupport, InputSource, StringReader, Attributes2Impl, AttributesImpl */
 (function () { // Begin namespace
 
-var that = this; // probably window object
+let that = this; // probably window object
 
 /* Private static variables (constant) */
 
@@ -221,11 +221,11 @@ SAXParser.prototype.parse = function (inputOrSystemId, noCache) { // (InputSourc
     // Parse an XML document (void). OR
     // Parse an XML document from a system identifier (URI) (void).
     // may throw java.io.IOException or SAXException
-    var systemId, xmlAsString, path;
+    let systemId, xmlAsString, path;
     //InputSource may not have been imported
     if (typeof that.InputSource === 'function' && inputOrSystemId instanceof InputSource) {
-        var charStream = inputOrSystemId.getCharacterStream();
-        var byteStream = inputOrSystemId.getByteStream();
+        let charStream = inputOrSystemId.getCharacterStream();
+        let byteStream = inputOrSystemId.getByteStream();
         // Priority for the parser is characterStream, byteStream, then URI, but we only really implemented the systemId (URI), so we automatically go with that
         systemId = inputOrSystemId.getSystemId();
         if (charStream) {
@@ -263,14 +263,14 @@ SAXParser.prototype.parse = function (inputOrSystemId, noCache) { // (InputSourc
 };
 
 SAXParser.prototype.parseString = function (xmlAsString) {
-    var reader = new StringReader(xmlAsString);
-    var readerWrapper = new ReaderWrapper(reader);
+    let reader = new StringReader(xmlAsString);
+    let readerWrapper = new ReaderWrapper(reader);
     this.initReaders(readerWrapper, reader);
     this.saxScanner.parse(readerWrapper);
 };
 
 SAXParser.prototype.initReaders = function (readerWrapper, reader) {
-    var saxEvents = new XMLFilterImpl2(this);
+    let saxEvents = new XMLFilterImpl2(this);
     this.saxScanner = new SAXScanner(this, saxEvents);
     this.saxScanner.namespaceSupport = this.namespaceSupport;
     if (this.features['http://debeissat.nicolas.free.fr/ns/character-data-strict']) {
@@ -326,12 +326,12 @@ SAXParser.prototype.initReaders = function (readerWrapper, reader) {
         this.contentHandler.locator.getColumnNumberOld = this.contentHandler.locator.getColumnNumber;
         this.contentHandler.locator.getLineNumberOld = this.contentHandler.locator.getLineNumber;
         this.contentHandler.locator.getColumnNumber = function () {
-            var columnNumber = this.reader.nextIdx - this.reader.s.substring(0, this.reader.nextIdx).lastIndexOf("\n");
+            let columnNumber = this.reader.nextIdx - this.reader.s.substring(0, this.reader.nextIdx).lastIndexOf("\n");
             this.setColumnNumber(columnNumber);
             return this.getColumnNumberOld();
         };
         this.contentHandler.locator.getLineNumber = function () {
-            var lineNumber = this.reader.s.substring(0, this.reader.nextIdx).split("\n").length;
+            let lineNumber = this.reader.s.substring(0, this.reader.nextIdx).split("\n").length;
             this.setLineNumber(lineNumber);
             return this.getLineNumberOld();
         };
@@ -420,7 +420,7 @@ SAXParser.prototype.startDocument_augmenting = function() {
     //initializes the elements at saxParser level, not at XMLFilter
     this.elements = {};
     this.instanceContext = new Context("", []);
-    var datatypeLibrary = new DatatypeLibrary();
+    let datatypeLibrary = new DatatypeLibrary();
     this.debug = false;
     this.validatorFunctions = new ValidatorFunctions(this, datatypeLibrary);
     return this.parent.contentHandler.startDocument.call(this.parent.contentHandler);
@@ -442,15 +442,15 @@ SAXParser.prototype.startDTD_augmenting = function(name, publicId, systemId) {
 */
 SAXParser.getPatternFromMixed = function(model, xmlFilter) {
     // if other elements
-    var pattern, mixed = /^\( ?#PCDATA ?(\|.*) ?\)\*$/.exec(model);
+    let pattern, mixed = /^\( ?#PCDATA ?(\|.*) ?\)\*$/.exec(model);
     if (mixed !== null) {
         //remove whitespaces
-        var elements = mixed[1].replace(/ /g, "");
-        var splitOr = elements.split("|");
+        let elements = mixed[1].replace(/ /g, "");
+        let splitOr = elements.split("|");
         //from the last to the second
-        for (var i = splitOr.length - 1 ; i > 0 ; i--) {
+        for (let i = splitOr.length - 1 ; i > 0 ; i--) {
             //trim whitespaces
-            var elemName = splitOr[i];
+            let elemName = splitOr[i];
             if (!xmlFilter.elements[elemName]) {
                 xmlFilter.elements[elemName] = new Element(new Name(null, elemName));
             }
@@ -475,11 +475,11 @@ SAXParser.getPatternFromMixed = function(model, xmlFilter) {
 */
 /* XML Name regular expressions */
 // Should disallow independent high or low surrogates or inversed surrogate pairs and also have option to reject private use characters; but strict mode will need to check for sequence of 2 characters if a surrogate is found
-var NAME_START_CHAR = ":A-Z_a-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02FF\u0370-\u037D\u037F-\u1FFF\u0200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD\ud800-\udbff\udc00-\udfff"; // The last two ranges are for surrogates that comprise #x10000-#xEFFFF; // Fix: Need to remove surrogate pairs here and handle elsewhere; also must deal with surrogates in entities
-var NAME_END_CHAR = ".0-9\u00B7\u0300-\u036F\u203F-\u2040-"; // Don't need escaping since to be put in a character class
-var parseModelRegexp = new RegExp("([" + NAME_START_CHAR + "][" + NAME_START_CHAR + NAME_END_CHAR + "]*)([*+?])? ?(([,|])?(.*))?");
+let NAME_START_CHAR = ":A-Z_a-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02FF\u0370-\u037D\u037F-\u1FFF\u0200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD\ud800-\udbff\udc00-\udfff"; // The last two ranges are for surrogates that comprise #x10000-#xEFFFF; // Fix: Need to remove surrogate pairs here and handle elsewhere; also must deal with surrogates in entities
+let NAME_END_CHAR = ".0-9\u00B7\u0300-\u036F\u203F-\u2040-"; // Don't need escaping since to be put in a character class
+let parseModelRegexp = new RegExp("([" + NAME_START_CHAR + "][" + NAME_START_CHAR + NAME_END_CHAR + "]*)([*+?])? ?(([,|])?(.*))?");
 SAXParser.getPatternFromChildren = function(model, xmlFilter) {
-    var brackets = /^\( ?(.*) ?\)([*+?]?)$/.exec(model);
+    let brackets = /^\( ?(.*) ?\)([*+?]?)$/.exec(model);
     if (brackets != null) {
         var restOfModel = brackets[1];
         var operator = brackets[2];
@@ -497,10 +497,10 @@ SAXParser.getPatternFromChildren = function(model, xmlFilter) {
         }
         return pattern;
     } else {
-        var parsedModel = parseModelRegexp.exec(model);
-        var name = parsedModel[1];
+        let parsedModel = parseModelRegexp.exec(model);
+        let name = parsedModel[1];
         var operator = parsedModel[2];
-        var separator = parsedModel[4];
+        let separator = parsedModel[4];
         var restOfModel = parsedModel[5];
         if (!xmlFilter.elements[name]) {
             xmlFilter.elements[name] = new Element(new Name(null, name));
@@ -547,7 +547,7 @@ SAXParser.getPatternFromModel = function(model, xmlFilter) {
     } else if (model === "ANY") {
         return new Choice(new Empty(), new OneOrMore(new Element(new AnyName())));
     } else {
-        var pattern;
+        let pattern;
         if (/^\( ?#PCDATA/.test(model)) {
             pattern = SAXParser.getPatternFromMixed(model, xmlFilter);
         } else {
@@ -558,8 +558,8 @@ SAXParser.getPatternFromModel = function(model, xmlFilter) {
 };
 
 SAXParser.prototype.elementDecl_augmenting = function(name, model) {
-    var pattern = SAXParser.getPatternFromModel(model, this);
-    var element = this.elements[name];
+    let pattern = SAXParser.getPatternFromModel(model, this);
+    let element = this.elements[name];
     if (!element) {
         element = this.elements[name] = new Element(new Name(null, name), pattern);
     } else {
@@ -630,8 +630,8 @@ SAXParser.augmentAttributes = function(elementNode, pattern) {
 };
 
 SAXParser.isAlreadyDeclared = function(aName, attributes) {
-    for (var i = 0 ; i < attributes.length ; i++) {
-        var nameClass = attributes[i].nameClass
+    for (let i = 0 ; i < attributes.length ; i++) {
+        let nameClass = attributes[i].nameClass
         if (nameClass.localName && nameClass.localName === aName) {
             return true;
         }
@@ -641,8 +641,8 @@ SAXParser.isAlreadyDeclared = function(aName, attributes) {
 
 
 SAXParser.prototype.attributeDecl_augmenting = function(eName, aName, type, mode, value) {
-    var element = this.elements[eName];
-    var alreadyDeclaredAttributes = [];
+    let element = this.elements[eName];
+    let alreadyDeclaredAttributes = [];
     if (!element) {
         element = this.elements[eName] = new Element(new Name(null, eName));
     } else {
@@ -651,36 +651,36 @@ SAXParser.prototype.attributeDecl_augmenting = function(eName, aName, type, mode
     if (SAXParser.isAlreadyDeclared(aName, alreadyDeclaredAttributes)) {
         this.warning("attribute : [" + aName + "] under element : [" + eName + "] is already declared", this.parent.saxScanner);
     } else {
-        var datatype;
+        let datatype;
         if (type === "NMTOKENS" || type === "NMTOKEN") {
             datatype = new Datatype("http://www.w3.org/2001/XMLSchema-datatypes", type);
         } else {
             datatype = new Datatype("http://www.w3.org/2001/XMLSchema-datatypes", "string");
         }
-        var paramList = [];
+        let paramList = [];
         //if it is an enumeration
         if (/^\(.+\)$/.test(type)) {
-            var typeToParse = type.replace(/^\(/, "").replace(/\)$/, "");
-            var values = typeToParse.split("|");
-            var i = values.length;
+            let typeToParse = type.replace(/^\(/, "").replace(/\)$/, "");
+            let values = typeToParse.split("|");
+            let i = values.length;
             while (i--) {
                 paramList.push(new Param("enumeration", values[i]));
             }
         }
-        var attributePattern = new Attribute(new Name(null, aName), new Data(datatype, paramList));
+        let attributePattern = new Attribute(new Name(null, aName), new Data(datatype, paramList));
         //stores the index in order to respect the order (only for tests validation purpose)
         attributePattern.index = alreadyDeclaredAttributes.length;
         //if it is optional
         if (mode !== "#REQUIRED") {
             //if a default value is provided
             if (value) {
-                var valueNormalized = SAXParser.attWhitespaceCollapse(type, value);
+                let valueNormalized = SAXParser.attWhitespaceCollapse(type, value);
                 attributePattern.defaultValue = new Value(datatype, valueNormalized, this.context);
             }
             attributePattern = new Choice(attributePattern, new Empty());
         }
         if (element.pattern) {
-            var group = new Group(element.pattern, attributePattern);
+            let group = new Group(element.pattern, attributePattern);
             element.pattern = group;
         } else {
             element.pattern = attributePattern;
@@ -693,9 +693,9 @@ SAXParser.prototype.attributeDecl_augmenting = function(eName, aName, type, mode
 };
 
 SAXParser.prototype.augmenting_elm = function(namespaceURI, localName, qName, atts) {
-    var attributeNodes = [];
-    for (var i = 0 ; i < atts.getLength() ; i++) {
-        var newAtt = new AttributeNode(new QName(atts.getURI(i), atts.getLocalName(i)), atts.getValue(i));
+    let attributeNodes = [];
+    for (let i = 0 ; i < atts.getLength() ; i++) {
+        let newAtt = new AttributeNode(new QName(atts.getURI(i), atts.getLocalName(i)), atts.getValue(i));
         newAtt.atts = atts;
         newAtt.index = i;
         //may need normalization
@@ -703,8 +703,8 @@ SAXParser.prototype.augmenting_elm = function(namespaceURI, localName, qName, at
         newAtt.setType = function(type) {
             this.atts.setType(this.index, type);
             if (this.attWhitespaceCollapse) {
-                var oldValue = this.atts.getValue(this.index);
-                var newValue = this.attWhitespaceCollapse(type, oldValue);
+                let oldValue = this.atts.getValue(this.index);
+                let newValue = this.attWhitespaceCollapse(type, oldValue);
                 this.atts.setValue(this.index, newValue);
             }
             if (this.atts.setDeclared) {
@@ -714,17 +714,17 @@ SAXParser.prototype.augmenting_elm = function(namespaceURI, localName, qName, at
         };
         attributeNodes.push(newAtt);
     }
-    var newElement = new ElementNode(new QName(namespaceURI, localName), this.instanceContext, attributeNodes, []);
+    let newElement = new ElementNode(new QName(namespaceURI, localName), this.instanceContext, attributeNodes, []);
     newElement.atts = atts;
     newElement.addAttribute = function(pattern) {
-        var qName = pattern.nameClass;
+        let qName = pattern.nameClass;
         //pattern is Attribute, pattern.pattern is Data
-        var type = null;
+        let type = null;
         if (pattern.pattern instanceof Data || pattern.pattern instanceof DataExcept) {
             type = pattern.pattern.datatype.localName;
         }
-        var value = pattern.defaultValue.string;
-        var index;
+        let value = pattern.defaultValue.string;
+        let index;
         if (pattern.index !== undefined && this.atts.addAttributeAtIndex) {
             index = pattern.index;
             this.atts.addAttributeAtIndex(pattern.index, qName.uri, qName.localName, qName.localName, type, value);
@@ -758,7 +758,7 @@ SAXParser.prototype.startElement_augmenting = function(namespaceURI, localName, 
     if (this.context) {
         this.augmenting_elm(namespaceURI, localName, qName, atts);
         //DTD augmentation
-        var pattern = this.elements[localName];
+        let pattern = this.elements[localName];
         if (pattern) {
             SAXParser.augmentAttributes(this.currentElementNode, pattern.pattern);
         }
@@ -772,7 +772,7 @@ SAXParser.prototype.startElement_validating = function(namespaceURI, localName, 
         this.augmenting_elm(namespaceURI, localName, qName, atts);
         this.resultPattern = this.validatorFunctions.childDeriv(this.context, this.pattern, this.childNode);
         if (this.resultPattern instanceof NotAllowed && !(this.resultPattern instanceof MissingContent)) {
-            var str = "document not valid, message is : [" + this.resultPattern.message + "]";
+            let str = "document not valid, message is : [" + this.resultPattern.message + "]";
             if (this.resultPattern.pattern) {
                 str += ", expected was : [" + this.resultPattern.pattern.toHTML() + "], found is : [" + this.resultPattern.childNode.toHTML() + "]";
             }
@@ -792,7 +792,7 @@ SAXParser.prototype.endElement_augmenting = function(namespaceURI, localName, qN
 SAXParser.prototype.characters_augmenting = function(ch, start, length) {
     //may not have any DTD
     if (this.context) {
-        var newText = new TextNode(ch);
+        let newText = new TextNode(ch);
         this.currentElementNode.childNodes.push(newText);
     }
     return this.parent.contentHandler.characters.call(this.parent.contentHandler, ch, start, length);
@@ -804,7 +804,7 @@ SAXParser.prototype.endDocument_validating = function() {
         this.resultPattern = this.validatorFunctions.childDeriv(this.context, this.pattern, this.childNode);
         if (this.resultPattern instanceof NotAllowed) {
             //may be string directly
-            var found = this.resultPattern.childNode;
+            let found = this.resultPattern.childNode;
             if (found.toHTML) {
                 found = found.toHTML();
             }
@@ -815,7 +815,7 @@ SAXParser.prototype.endDocument_validating = function() {
 };
 
 SAXParser.loadFile = function(fname) {
-    var xmlhttp = null;
+    let xmlhttp = null;
     if (window.XMLHttpRequest) {// code for Firefox, Opera, IE7, etc.
         xmlhttp = new XMLHttpRequest();
     } else if (window.ActiveXObject) {// code for IE6, IE5
@@ -834,7 +834,7 @@ SAXParser.loadFile = function(fname) {
 };
 
 SAXParser.prototype.resolveEntity = function(entityName, publicId, baseURI, systemId) {
-    var txt;
+    let txt;
     if (baseURI) {
         txt = SAXParser.loadFile(baseURI + systemId);
     //new version of method
@@ -850,19 +850,19 @@ SAXParser.prototype.resolveEntity = function(entityName, publicId, baseURI, syst
 };
 
 SAXParser.getSAXParseException = function(message, locator, saxScanner) {
-    var saxParseException = new SAXParseException(message, locator);
+    let saxParseException = new SAXParseException(message, locator);
     return saxParseException;
 };
 
 SAXParser.prototype.warning = function(message, saxScanner) {
-    var saxParseException = SAXParser.getSAXParseException(message, this.parent.contentHandler.locator, saxScanner);
+    let saxParseException = SAXParser.getSAXParseException(message, this.parent.contentHandler.locator, saxScanner);
     if (this.parent && this.parent.errorHandler) {
         this.parent.errorHandler.warning.call(this.parent.errorHandler, saxParseException);
     }
 };
 
 SAXParser.prototype.error = function(message, saxScanner) {
-    var saxParseException = SAXParser.getSAXParseException(message, this.parent.contentHandler.locator, saxScanner);
+    let saxParseException = SAXParser.getSAXParseException(message, this.parent.contentHandler.locator, saxScanner);
 
     if (this.parent && this.parent.errorHandler) {
 
@@ -871,7 +871,7 @@ SAXParser.prototype.error = function(message, saxScanner) {
 };
 
 SAXParser.prototype.fatalError = function(message, saxScanner) {
-    var saxParseException = SAXParser.getSAXParseException(message, this.parent.contentHandler.locator, saxScanner);
+    let saxParseException = SAXParser.getSAXParseException(message, this.parent.contentHandler.locator, saxScanner);
     if (this.parent && this.parent.errorHandler) {
         this.parent.errorHandler.fatalError.call(this.parent.errorHandler, saxParseException);
     }
@@ -902,10 +902,10 @@ XMLReaderFactory.createXMLReader = function (className) {
 
 XMLReaderFactory.getSaxImport = function() {
     if (!that.saxImport) {
-        var scripts = document.getElementsByTagName("script");
-        for (var i = 0 ; i < scripts.length ; i++) {
-            var script = scripts.item(i);
-            var src = script.getAttribute("src");
+        let scripts = document.getElementsByTagName("script");
+        for (let i = 0 ; i < scripts.length ; i++) {
+            let script = scripts.item(i);
+            let src = script.getAttribute("src");
             if (src && src.match("sax.js")) {
                 that.saxImport = script;
                 return that.saxImport;
@@ -917,9 +917,9 @@ XMLReaderFactory.getSaxImport = function() {
 
 XMLReaderFactory.getJsPath = function() {
     if (that.jsPath === undefined) {
-        var scriptTag = XMLReaderFactory.getSaxImport();
+        let scriptTag = XMLReaderFactory.getSaxImport();
         if (scriptTag) {
-            var src = scriptTag.getAttribute("src");
+            let src = scriptTag.getAttribute("src");
             that.jsPath = src.substring(0, src.lastIndexOf("/") + 1);
         }
     }
@@ -927,11 +927,11 @@ XMLReaderFactory.getJsPath = function() {
 };
 
 XMLReaderFactory.importJS = function(filename) {
-    var scriptTag = XMLReaderFactory.getSaxImport();
+    let scriptTag = XMLReaderFactory.getSaxImport();
     if (scriptTag !== undefined) {
-        var path = XMLReaderFactory.getJsPath();
+        let path = XMLReaderFactory.getJsPath();
         if (path !== undefined) {
-            var script = document.createElement("script");
+            let script = document.createElement("script");
             script.setAttribute("src", path + filename);
             script.setAttribute("type", "text/javascript");
             scriptTag.parentNode.insertBefore(script, scriptTag);

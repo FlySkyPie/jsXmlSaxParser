@@ -37,7 +37,7 @@
 
 /* Private static helpers treated below as private instance methods, so don't need to add these to the public API; we might use a Relator to also get rid of non-standard public properties */
 function _displayAtts (atts) {
-    for (var i = 0 ; i < atts.getLength() ; i++) {
+    for (let i = 0 ; i < atts.getLength() ; i++) {
         this.div.innerHTML += "attribute [" + atts.getURI(i) + "] [" + atts.getLocalName(i) + "] [" + atts.getValue(i) + "]<br/>";
     }
 }

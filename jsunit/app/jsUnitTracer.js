@@ -42,7 +42,7 @@ jsUnitTracer.prototype.debug = function ()
 jsUnitTracer.prototype._trace = function (message, value, traceLevel) 
 {
   if (this._getChosenTraceLevel() >= traceLevel) {
-    var traceString = message;
+    let traceString = message;
     if (value)
       traceString += ': ' + value;
     this._writeToTraceWindow(traceString, traceLevel);
@@ -56,7 +56,7 @@ jsUnitTracer.prototype._getChosenTraceLevel = function ()
 
 jsUnitTracer.prototype._writeToTraceWindow  = function (traceString, traceLevel) 
 {
-  var htmlToAppend = '<p class="jsUnitDefault">' + traceString + '<\/p>\n';
+  let htmlToAppend = '<p class="jsUnitDefault">' + traceString + '<\/p>\n';
   this._getTraceWindow().document.write(htmlToAppend);
 }
 
@@ -68,7 +68,7 @@ jsUnitTracer.prototype._getTraceWindow = function ()
       this.popupWindowsBlocked = true;
     }
     else {
-      var resDoc = this._traceWindow.document;
+      let resDoc = this._traceWindow.document;
       resDoc.write('<html>\n<head>\n<link rel="stylesheet" href="css/jsUnitStyle.css">\n<title>Tracing - JsUnit<\/title>\n<head>\n<body>');
       resDoc.write('<h2>Tracing - JsUnit<\/h2>\n');
     }

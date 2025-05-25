@@ -89,7 +89,7 @@ xbDebug.prototype.dump = function (msg)
   return;
 }
 
-var xbDEBUG = new xbDebug();
+let xbDEBUG = new xbDebug();
 
 window.onunload = function () { xbDEBUG.close(); }
 
@@ -104,7 +104,7 @@ function xbDebugGetFunctionName(funcref)
   if (funcref.name)
     return funcref.name;
 
-  var name = funcref + '';
+  let name = funcref + '';
   name = name.substring(name.indexOf(' ') + 1, name.indexOf('('));
   funcref.name = name;
 
@@ -116,7 +116,7 @@ function xbDebugGetFunctionName(funcref)
 // emulate functionref.apply for IE mac and IE win < 5.5
 function xbDebugApplyFunction(funcname, funcref, thisref, argumentsref)
 {
-  var rv;
+  let rv;
 
   if (!funcref)
   {
@@ -126,8 +126,8 @@ function xbDebugApplyFunction(funcname, funcref, thisref, argumentsref)
   if (typeof(funcref.apply) != 'undefined')
       return funcref.apply(thisref, argumentsref);
 
-  var applyexpr = 'thisref.xbDebug_orig_' + funcname + '(';
-  var i;
+  let applyexpr = 'thisref.xbDebug_orig_' + funcname + '(';
+  let i;
 
   for (i = 0; i < argumentsref.length; i++)
   {
@@ -146,15 +146,15 @@ function xbDebugApplyFunction(funcname, funcref, thisref, argumentsref)
 
 function xbDebugCreateFunctionWrapper(scopename, funcname, precall, postcall)
 {
-  var wrappedfunc;
-  var scopeobject = eval(scopename);
-  var funcref = scopeobject[funcname];
+  let wrappedfunc;
+  let scopeobject = eval(scopename);
+  let funcref = scopeobject[funcname];
 
   scopeobject['xbDebug_orig_' + funcname] = funcref;
 
   wrappedfunc = function () 
   {
-    var rv;
+    let rv;
 
     precall(scopename, funcname, arguments);
     rv = xbDebugApplyFunction(funcname, funcref, scopeobject, arguments);
@@ -173,18 +173,18 @@ function xbDebugCreateFunctionWrapper(scopename, funcname, precall, postcall)
 
 function xbDebugCreateMethodWrapper(contextname, classname, methodname, precall, postcall)
 {
-  var context = eval(contextname);
-  var methodref = context[classname].prototype[methodname];
+  let context = eval(contextname);
+  let methodref = context[classname].prototype[methodname];
 
   context[classname].prototype['xbDebug_orig_' + methodname] = methodref;
 
-  var wrappedmethod = function () 
+  let wrappedmethod = function () 
   {
-    var rv;
+    let rv;
     // eval 'this' at method run time to pick up reference to the object's instance
-    var thisref = eval('this');
+    let thisref = eval('this');
     // eval 'arguments' at method run time to pick up method's arguments
-    var argsref = arguments;
+    let argsref = arguments;
 
     precall(contextname + '.' + classname, methodname, argsref);
     rv = xbDebugApplyFunction(methodname, methodref, thisref, argsref);
@@ -197,8 +197,8 @@ function xbDebugCreateMethodWrapper(contextname, classname, methodname, precall,
 
 function xbDebugPersistToString(obj)
 {
-  var s = '';
-  var p;
+  let s = '';
+  let p;
 
   if (obj == null)
      return 'null';
@@ -223,9 +223,9 @@ function xbDebugPersistToString(obj)
 
 function xbDebugTraceBefore(scopename, funcname, funcarguments) 
 {
-  var i;
-  var s = '';
-  var execprofile = xbDEBUG.execprofile[scopename + '.' + funcname];
+  let i;
+  let s = '';
+  let execprofile = xbDEBUG.execprofile[scopename + '.' + funcname];
   if (!execprofile)
     execprofile = xbDEBUG.execprofile[scopename + '.' + funcname] = { started: 0, time: 0, count: 0 };
 
@@ -242,9 +242,9 @@ function xbDebugTraceBefore(scopename, funcname, funcarguments)
 
 function xbDebugTraceAfter(scopename, funcname, funcarguments, rv) 
 {
-  var i;
-  var s = '';
-  var execprofile = xbDEBUG.execprofile[scopename + '.' + funcname];
+  let i;
+  let s = '';
+  let execprofile = xbDEBUG.execprofile[scopename + '.' + funcname];
   if (!execprofile)
     xbDEBUG.dump('xbDebugTraceAfter: execprofile not created for ' + scopename + '.' + funcname);
   else if (execprofile.started == 0)
@@ -273,9 +273,9 @@ function xbDebugTraceFunction(scopename, funcname)
 
 function xbDebugTraceObject(contextname, classname)
 {
-  var classref = eval(contextname + '.' + classname);
-  var p;
-  var sp;
+  let classref = eval(contextname + '.' + classname);
+  let p;
+  let sp;
 
   if (!classref || !classref.prototype)
      return;
@@ -292,9 +292,9 @@ function xbDebugTraceObject(contextname, classname)
 
 function xbDebugDumpProfile()
 {
-  var p;
-  var execprofile;
-  var avg;
+  let p;
+  let execprofile;
+  let avg;
 
   for (p in xbDEBUG.execprofile)
   {

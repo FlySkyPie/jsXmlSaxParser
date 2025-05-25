@@ -6,39 +6,39 @@ This is the private API for SAX parsing
 (function () { // Begin namespace
 
 /* Scanner states */
-var STATE_XML_DECL                  =  0;
-var STATE_PROLOG                    =  1;
-var STATE_EXT_ENT                   =  2;
-var STATE_PROLOG_DOCTYPE_DECLARED   =  3;
-var STATE_ROOT_ELEMENT              =  4;
-var STATE_CONTENT                   =  5;
-var STATE_TRAILING_MISC             =  6;
+let STATE_XML_DECL                  =  0;
+let STATE_PROLOG                    =  1;
+let STATE_EXT_ENT                   =  2;
+let STATE_PROLOG_DOCTYPE_DECLARED   =  3;
+let STATE_ROOT_ELEMENT              =  4;
+let STATE_CONTENT                   =  5;
+let STATE_TRAILING_MISC             =  6;
 
-var XML_VERSIONS = ['1.0', '1.1']; // All existing versions of XML; will check this.features['http://xml.org/sax/features/xml-1.1'] if parser supports XML 1.1
-var XML_VERSION = /^1\.\d+$/;
-var ENCODING = /^[A-Za-z]([A-Za-z0-9._]|-)*$/;
-var STANDALONE = /^yes$|^no$/;
+let XML_VERSIONS = ['1.0', '1.1']; // All existing versions of XML; will check this.features['http://xml.org/sax/features/xml-1.1'] if parser supports XML 1.1
+let XML_VERSION = /^1\.\d+$/;
+let ENCODING = /^[A-Za-z]([A-Za-z0-9._]|-)*$/;
+let STANDALONE = /^yes$|^no$/;
 
 /* XML Name regular expressions */
 // Should disallow independent high or low surrogates or inversed surrogate pairs and also have option to reject private use characters; but strict mode will need to check for sequence of 2 characters if a surrogate is found
-var NAME_START_CHAR = ":A-Z_a-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02FF\u0370-\u037D\u037F-\u1FFF\u0200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD\ud800-\udbff\udc00-\udfff"; // The last two ranges are for surrogates that comprise #x10000-#xEFFFF; // Fix: Need to remove surrogate pairs here and handle elsewhere; also must deal with surrogates in entities
-var NOT_START_CHAR = new RegExp("[^" + NAME_START_CHAR + "]");
-var NAME_END_CHAR = ".0-9\u00B7\u0300-\u036F\u203F-\u2040-"; // Don't need escaping since to be put in a character class
-var NOT_START_OR_END_CHAR = new RegExp("[^" + NAME_START_CHAR + NAME_END_CHAR + "]");
+let NAME_START_CHAR = ":A-Z_a-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02FF\u0370-\u037D\u037F-\u1FFF\u0200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD\ud800-\udbff\udc00-\udfff"; // The last two ranges are for surrogates that comprise #x10000-#xEFFFF; // Fix: Need to remove surrogate pairs here and handle elsewhere; also must deal with surrogates in entities
+let NOT_START_CHAR = new RegExp("[^" + NAME_START_CHAR + "]");
+let NAME_END_CHAR = ".0-9\u00B7\u0300-\u036F\u203F-\u2040-"; // Don't need escaping since to be put in a character class
+let NOT_START_OR_END_CHAR = new RegExp("[^" + NAME_START_CHAR + NAME_END_CHAR + "]");
 
 //[2]   	Char	   ::=   	#x9 | #xA | #xD | [#x20-#xD7FF] | [#xE000-#xFFFD] | [#x10000-#x10FFFF]
 //for performance reason I will not be conformant in applying this within the class (see CHAR_DATA_REGEXP)
-var HIGH_SURR = "\ud800-\udbff"; // db7f cut-off would restrict private high surrogates
-var LOW_SURR = "\udc00-\udfff";
-var HIGH_SURR_EXP = new RegExp('['+HIGH_SURR+']');
-var LOW_SURR_EXP = new RegExp('['+LOW_SURR+']');
+let HIGH_SURR = "\ud800-\udbff"; // db7f cut-off would restrict private high surrogates
+let LOW_SURR = "\udc00-\udfff";
+let HIGH_SURR_EXP = new RegExp('['+HIGH_SURR+']');
+let LOW_SURR_EXP = new RegExp('['+LOW_SURR+']');
 
-var CHAR = "\u0009\u000A\u000D\u0020-\uD7FF\uE000-\uFFFD";
-var NOT_CHAR = '[^'+CHAR+']';
-var NOT_A_CHAR = new RegExp(NOT_CHAR);
-var NOT_A_CHAR_ERROR_CB = function () {
+let CHAR = "\u0009\u000A\u000D\u0020-\uD7FF\uE000-\uFFFD";
+let NOT_CHAR = '[^'+CHAR+']';
+let NOT_A_CHAR = new RegExp(NOT_CHAR);
+let NOT_A_CHAR_ERROR_CB = function () {
     if (this.reader.peek().search(HIGH_SURR_EXP) !== -1) {
-        var temp_ch = this.reader.peek(); // Remember for errors
+        let temp_ch = this.reader.peek(); // Remember for errors
         this.reader.nextChar(true);
         if (this.reader.peek().search(LOW_SURR_EXP) !== -1) {
             return true;
@@ -47,22 +47,22 @@ var NOT_A_CHAR_ERROR_CB = function () {
     }
     return this.saxEvents.fatalError("invalid XML character, decimal code number '"+this.reader.peek().charCodeAt(0)+"'", this);
 };
-var NOT_A_CHAR_CB_OBJ = {pattern:NOT_A_CHAR, cb:NOT_A_CHAR_ERROR_CB};
+let NOT_A_CHAR_CB_OBJ = {pattern:NOT_A_CHAR, cb:NOT_A_CHAR_ERROR_CB};
 
-var WS_CHARS = '\\t\\n\\r ';
-var WS_CHAR = '['+WS_CHARS+']'; // \s is too inclusive
-var WS = new RegExp(WS_CHAR);
-var NON_WS = new RegExp('[^'+WS_CHARS+']');
+let WS_CHARS = '\\t\\n\\r ';
+let WS_CHAR = '['+WS_CHARS+']'; // \s is too inclusive
+let WS = new RegExp(WS_CHAR);
+let NON_WS = new RegExp('[^'+WS_CHARS+']');
 //in the case of XML declaration document has not yet been processed, token is on <
-var XML_DECL_BEGIN_STR = "^<\\?xml"+WS_CHAR;
-var XML_DECL_BEGIN = new RegExp(XML_DECL_BEGIN_STR);
+let XML_DECL_BEGIN_STR = "^<\\?xml"+WS_CHAR;
+let XML_DECL_BEGIN = new RegExp(XML_DECL_BEGIN_STR);
 // in the case of detection of double XML declation, token is on ?
-var XML_DECL_BEGIN_FALSE = new RegExp("^xml("+WS_CHAR+'|\\?)', 'i');
+let XML_DECL_BEGIN_FALSE = new RegExp("^xml("+WS_CHAR+'|\\?)', 'i');
 
-var NOT_REPLACED_ENTITIES = /^amp$|^lt$|^gt$|^quot$/;
-var APOS_ENTITY = /^apos$/;
-var CHAR_REF_ESCAPED = /^"$|^'$/;
-var charRefEscaped = {};
+let NOT_REPLACED_ENTITIES = /^amp$|^lt$|^gt$|^quot$/;
+let APOS_ENTITY = /^apos$/;
+let CHAR_REF_ESCAPED = /^"$|^'$/;
+let charRefEscaped = {};
 charRefEscaped["'"] = "&apos;";
 charRefEscaped['"'] = "&quot;";
 
@@ -347,13 +347,13 @@ SAXScanner.prototype.scanMarkup = function() {
 //  what I understand from there : http://www.w3.org/TR/REC-xml/#dt-chardata is that & is allowed
 // in character data only if it is an entity reference
 SAXScanner.prototype.scanText = function() {
-    var content = this.scanCharData();
+    let content = this.scanCharData();
     //in case of external entity, the process is reinitialized??
     //if found a "&"
     while (this.reader.matchChar("&")) {
         try {
             //scanRef returns character reference if it is not an entity
-            var charRef = this.scanRef();
+            let charRef = this.scanRef();
             if (charRef) {
                 content += charRef;
             }
@@ -362,7 +362,7 @@ SAXScanner.prototype.scanText = function() {
                 content += "&" + e.entityName + ";";
             } else if (e instanceof InternalEntityNotFoundException) {
                 // at this place in XML, that entity ref may be an external entity
-                var externalId = this.externalEntities[e.entityName];
+                let externalId = this.externalEntities[e.entityName];
                 if (externalId === undefined) {
                     this.saxEvents.error("entity : [" + e.entityName + "] not declared as an internal entity or as an external one", this);
                 } else {
@@ -385,7 +385,7 @@ SAXScanner.prototype.scanText = function() {
 
 // 14]   	CharData ::= [^<&]* - ([^<&]* ']]>' [^<&]*)
 SAXScanner.prototype.scanCharData = function() {
-    var content = this.reader.nextCharRegExp(this.CHAR_DATA_REGEXP, NOT_A_CHAR_CB_OBJ);
+    let content = this.reader.nextCharRegExp(this.CHAR_DATA_REGEXP, NOT_A_CHAR_CB_OBJ);
     //if found a "]", must ensure that it is not followed by "]>"
     while (this.reader.matchChar("]")) {
         if (this.reader.matchStr("]>")) {
@@ -398,8 +398,8 @@ SAXScanner.prototype.scanCharData = function() {
 
 
 SAXScanner.prototype.getRelativeBaseUri = function() {
-    var returned = this.saxParser.baseURI;
-    var i = this.relativeBaseUris.length;
+    let returned = this.saxParser.baseURI;
+    let i = this.relativeBaseUris.length;
     while (i--) {
         returned += this.relativeBaseUris[i];
     }
@@ -415,7 +415,7 @@ SAXScanner.prototype.includeEntity = function(entityName, replacement) {
     if (replacement instanceof ExternalId) {
         try {
             //it seems externalEntity does not take in account xml:base, see xmlconf.xml
-            var externalEntity = this.saxEvents.resolveEntity(entityName, replacement.publicId, this.saxParser.baseURI, replacement.systemId);
+            let externalEntity = this.saxEvents.resolveEntity(entityName, replacement.publicId, this.saxParser.baseURI, replacement.systemId);
             if (externalEntity !== undefined) {
                 //check for no recursion
                 if (externalEntity.search(new RegExp("&" + entityName + ";")) !== -1) {
@@ -423,7 +423,7 @@ SAXScanner.prototype.includeEntity = function(entityName, replacement) {
                 }
                 //there may be another xml declaration at beginning of external entity
                 this.includeText(externalEntity);
-                var oldState = this.state;
+                let oldState = this.state;
                 this.state = STATE_EXT_ENT;
                 //if external entity begins with XML declaration, can begin processing otherwise directly use continueParsing
                 if (this.reader.matchRegExp(6, XML_DECL_BEGIN, true)) {
@@ -465,7 +465,7 @@ SAXScanner.prototype.scanRef = function() {
 SAXScanner.prototype.scanComment = function() {
     if (this.reader.matchChar("-")) {
         if (this.reader.matchChar("-")) {
-            var comment = this.reader.nextCharRegExp(new RegExp(NOT_CHAR+'|-'), NOT_A_CHAR_CB_OBJ);
+            let comment = this.reader.nextCharRegExp(new RegExp(NOT_CHAR+'|-'), NOT_A_CHAR_CB_OBJ);
             while (this.reader.matchChar("-")) {
                 if (this.reader.matchStr("->")) {
                     break;
@@ -515,8 +515,8 @@ SAXScanner.prototype.scanXMLDeclOrTextDeclAttribute = function (allowableAtts, a
         return this.saxEvents.fatalError('The XML Declaration or Text Declaration must possess a space between the version/encoding/standalone information.', this);
     }
     this.reader.skipWhiteSpaces();
-    var attName = this.scanName();
-    var attPos = allowableAtts.indexOf(attName);
+    let attName = this.scanName();
+    let attPos = allowableAtts.indexOf(attName);
     if (attPos === -1) {
         if (['version', 'encoding', 'standalone'].indexOf(attName) !== -1) {
             return this.saxEvents.fatalError('The attribute name "'+attName+'" was not expected at this position in an XML or text declaration. It was expected to be: '+allowableAtts.join(', '), this);
@@ -563,8 +563,8 @@ first character of document
 SAXScanner.prototype.scanXMLDeclOrTextDecl = function() {
     // Fix: need to have conditions to trigger STATE_EXT_ENT somehow
     // allow scanning of text declaration/external XML entity?
-    var version = null;
-    var encoding = 'UTF-8'; // As the default with no declaration is UTF-8, we assume it is such, unless the
+    let version = null;
+    let encoding = 'UTF-8'; // As the default with no declaration is UTF-8, we assume it is such, unless the
     // encoding is indicated explicitly, in which case we will trust that. We are therefore not able to discern
     // UTF-16 represented without an explicit declaration nor report any inconsistencies between header encoding,
     // byte-order mark, or explicit encoding information, unless it is reported on InputSource (see next note).
@@ -579,21 +579,21 @@ SAXScanner.prototype.scanXMLDeclOrTextDecl = function() {
     //    we don't know what it is) and the encoding indicated in its (optional) XML Declaration/Text Declaration
 
     if (this.reader.matchRegExp(6, XML_DECL_BEGIN)) {
-        var standalone = false;
+        let standalone = false;
         if (this.state === STATE_XML_DECL) {
-            var versionArr = this.scanXMLDeclOrTextDeclAttribute(['version'], [XML_VERSION]);
+            let versionArr = this.scanXMLDeclOrTextDeclAttribute(['version'], [XML_VERSION]);
             if (!versionArr) {
                 return this.saxEvents.fatalError("An XML Declaration must have version information", this);
             }
             version = versionArr[1];
             this.setXMLVersion(version);
-            var encodingOrStandalone = this.scanXMLDeclOrTextDeclAttribute(['encoding', 'standalone'], [ENCODING, STANDALONE], true);
+            let encodingOrStandalone = this.scanXMLDeclOrTextDeclAttribute(['encoding', 'standalone'], [ENCODING, STANDALONE], true);
             if (encodingOrStandalone) {
                 if (encodingOrStandalone[0] === 'encoding') {
                     encoding = encodingOrStandalone[1];
                     this.setEncoding(encoding);
                     
-                    var standaloneArr = this.scanXMLDeclOrTextDeclAttribute(['standalone'], [STANDALONE], true);
+                    let standaloneArr = this.scanXMLDeclOrTextDeclAttribute(['standalone'], [STANDALONE], true);
                     if (standaloneArr && standaloneArr === 'yes') {
                         standalone = true;
                     }
@@ -601,7 +601,7 @@ SAXScanner.prototype.scanXMLDeclOrTextDecl = function() {
             }
             this.saxParser.features['http://xml.org/sax/features/is-standalone'] = standalone;
         } else { // STATE_EXT_ENT
-            var versionOrEncodingArr = this.scanXMLDeclOrTextDeclAttribute(['version', 'encoding'], [XML_VERSION, ENCODING]);
+            let versionOrEncodingArr = this.scanXMLDeclOrTextDeclAttribute(['version', 'encoding'], [XML_VERSION, ENCODING]);
             if (versionOrEncodingArr[0] === 'version') {
                 version = versionOrEncodingArr[1];
                 this.setXMLVersion(version);
@@ -646,9 +646,9 @@ SAXScanner.prototype.scanPI = function() {
     if (this.reader.matchRegExp(4, XML_DECL_BEGIN_FALSE)) {
         return this.saxEvents.fatalError("XML Declaration cannot occur past the very beginning of the document.", this);
     }
-    var piName = this.scanName();
+    let piName = this.scanName();
     this.reader.skipWhiteSpaces();
-    var piData = this.reader.nextCharRegExp(new RegExp(NOT_CHAR+'|\\?'), NOT_A_CHAR_CB_OBJ);
+    let piData = this.reader.nextCharRegExp(new RegExp(NOT_CHAR+'|\\?'), NOT_A_CHAR_CB_OBJ);
     //if found a "?", end if it is followed by ">"
     while (this.reader.matchChar("?")) {
         if (this.reader.matchChar(">")) {
@@ -664,14 +664,14 @@ SAXScanner.prototype.scanPI = function() {
 SAXScanner.prototype.loadExternalDtd = function(externalId) {
     //in case of restricted uri error
     try {
-        var uri;
+        let uri;
         //in case xml is loaded from string (do we load dtd in that case ?)
         if (this.saxParser.baseURI) {
             uri = this.saxParser.baseURI + externalId.systemId;
         } else {
             uri = externalId.systemId;
         }
-        var extSubset = SAXParser.loadFile(uri);
+        let extSubset = SAXParser.loadFile(uri);
         this.scanExtSubset(extSubset);
     } catch(e) {
         this.saxEvents.warning("exception : [" + e.toString() + "] trying to load external subset : [" + this.saxParser.baseURI + externalId.systemId + "]", this);
@@ -682,9 +682,9 @@ SAXScanner.prototype.loadExternalDtd = function(externalId) {
 SAXScanner.prototype.scanDoctypeDecl = function() {
     if (this.reader.matchStr("DOCTYPE")) {
         this.reader.skipWhiteSpaces();
-        var name = this.reader.nextCharRegExp(/[ \[>]/);
+        let name = this.reader.nextCharRegExp(/[ \[>]/);
         this.reader.skipWhiteSpaces();
-        var externalId = new ExternalId();
+        let externalId = new ExternalId();
         //if there is an externalId
         if (this.scanExternalId(externalId)) {
             this.reader.skipWhiteSpaces();
@@ -719,7 +719,7 @@ SAXScanner.prototype.scanDoctypeDecl = function() {
 */
 SAXScanner.prototype.scanExtSubset = function(extSubset) {
     if (extSubset.search(NON_WS) !== -1) {
-        var oldReader = this.reader;
+        let oldReader = this.reader;
         this.reader = new ReaderWrapper(new StringReader(extSubset));
         this.startParsing();
         //current char is first <
@@ -785,19 +785,19 @@ When a parameter-entity reference is recognized in the DTD and included, its rep
  of one leading and one following space (#x20) character
 */
 SAXScanner.prototype.includeParameterEntity = function() {
-    var replacement = this.scanPeRef();
+    let replacement = this.scanPeRef();
     // entity is replaced and its replacement is parsed, see http://www.w3.org/TR/REC-xml/#included
     //if it is an externalId, have to include the external content
     if (replacement instanceof ExternalId) {
         try {
             //it seems externalEntity does not take in account xml:base, see xmlconf.xml
             //call new version of method
-            var externalEntity = this.saxEvents.resolveEntity(null, replacement.publicId, null, this.saxParser.baseURI + replacement.systemId);
+            let externalEntity = this.saxEvents.resolveEntity(null, replacement.publicId, null, this.saxParser.baseURI + replacement.systemId);
             //if not only whitespace
             if (externalEntity !== undefined && externalEntity.search(NON_WS) !== -1) {
                 //there may be another xml declaration at beginning of external entity
                 this.includeText(externalEntity);
-                var oldState = this.state;
+                let oldState = this.state;
                 this.state = STATE_EXT_ENT;
                 //if external entity begins with XML declaration, can begin processing otherwise directly use continueParsing
                 if (this.reader.matchRegExp(6, XML_DECL_BEGIN, true)) {
@@ -861,7 +861,7 @@ current char is first char of declaration
 ending char is >
 */
 SAXScanner.prototype.scanEntityDecl = function() {
-    var entityName, externalId, entityValue;
+    let entityName, externalId, entityValue;
     if (this.reader.matchStr("ENTITY")) {
         this.reader.skipWhiteSpaces();
         if (this.reader.matchChar("%")) {
@@ -879,7 +879,7 @@ SAXScanner.prototype.scanEntityDecl = function() {
                     this.parameterEntities[entityName] = externalId;
                 }
             } else {
-                var ignored = this.reader.nextCharWhileNot(">");
+                let ignored = this.reader.nextCharWhileNot(">");
                 //an XML processor MAY issue a warning if entities are declared multiple times.
                 this.saxEvents.warning("entity : [" + entityName + "] is declared several times, only first value : [" + this.parameterEntities[entityName] + "] is effective, declaration : [" + ignored + "] is ignored");
             }
@@ -891,7 +891,7 @@ SAXScanner.prototype.scanEntityDecl = function() {
                 this.reader.skipWhiteSpaces();
                 if (this.reader.matchStr("NDATA")) {
                     this.reader.skipWhiteSpaces();
-                    var ndataName = this.scanName();
+                    let ndataName = this.scanName();
                     this.saxEvents.unparsedEntityDecl(entityName, externalId.publicId, externalId.systemId, ndataName);
                 }
                 if (this.externalEntities[entityName] === undefined) {
@@ -924,16 +924,16 @@ SAXScanner.prototype.scanEntityDecl = function() {
 false is OK
 */
 SAXScanner.prototype.isEntityReferencingItself = function(entityName, entityValue) {
-    var parsedValue = /^[^&]*&([^;]+);(.*)/.exec(entityValue);
+    let parsedValue = /^[^&]*&([^;]+);(.*)/.exec(entityValue);
     if (parsedValue !== null) {
         // parsedValue[1] is the name of the nested entity
         if (parsedValue[1] === entityName) {
             return true;
         } else {
-            var replacement = this.entities[parsedValue[1]];
+            let replacement = this.entities[parsedValue[1]];
             //if already declared
             if (replacement !== undefined) {
-                var check = this.isEntityReferencingItself(entityName, replacement);
+                let check = this.isEntityReferencingItself(entityName, replacement);
                 return check || this.isEntityReferencingItself(entityName, parsedValue[2]);
             } else {
                 return this.isEntityReferencingItself(entityName, parsedValue[2]);
@@ -952,13 +952,13 @@ SAXScanner.prototype.isEntityReferencingItself = function(entityName, entityValu
 */
 SAXScanner.prototype.scanEntityValue = function() {
     if (this.reader.equals('"') || this.reader.equals("'")) {
-        var quote = this.reader.next();
-        var regexp = new RegExp("[" + quote + "&%]");
-        var entityValue = this.reader.nextCharRegExp(regexp);
+        let quote = this.reader.next();
+        let regexp = new RegExp("[" + quote + "&%]");
+        let entityValue = this.reader.nextCharRegExp(regexp);
         //if found a "%" must replace it, EntityRef are not replaced here, but char ref are replaced, see XML spec 4.4.8
         while (true) {
             if (this.reader.matchChar("%")) {
-                var peRef = this.scanPeRef();
+                let peRef = this.scanPeRef();
                 //in this case replace externalId by its content but does not parse anything
                 if (peRef instanceof ExternalId) {
                     peRef = this.saxEvents.resolveEntity(null, peRef.publicId, null, this.saxParser.baseURI + peRef.systemId);
@@ -966,7 +966,7 @@ SAXScanner.prototype.scanEntityValue = function() {
                 entityValue += peRef + this.reader.nextCharRegExp(regexp);
             } else if (this.reader.matchChar("&")) {
                 if (this.reader.matchChar("#")) {
-                    var charRef = this.scanCharRef();
+                    let charRef = this.scanCharRef();
                     entityValue += charRef + this.reader.nextCharRegExp(regexp);
                 } else {
                     entityValue += "&" + this.reader.nextCharRegExp(regexp);
@@ -996,7 +996,7 @@ SAXScanner.prototype.scanPeRef = function(entityName) {
         entityName = this.reader.nextCharWhileNot(";");
         this.reader.nextChar(true);
         //tries to replace it by its value if declared internally in doctype declaration
-        var replacement = this.parameterEntities[entityName];
+        let replacement = this.parameterEntities[entityName];
         if (replacement !== undefined) {
             return replacement;
         }
@@ -1023,9 +1023,9 @@ ending char is >
 SAXScanner.prototype.scanElementDecl = function() {
     if (this.reader.matchStr("ELEMENT")) {
         this.reader.skipWhiteSpaces();
-        var name = this.scanName();
+        let name = this.scanName();
         this.reader.skipWhiteSpaces();
-        var model = this.scanContentModelDecl();
+        let model = this.scanContentModelDecl();
         //current char must be ending >
         this.reader.nextChar(true);
         this.saxEvents.elementDecl(name, model);
@@ -1039,8 +1039,8 @@ does not remove whitespace as "|" is a valid name character
 collapse only whitespace to single space
 */
 SAXScanner.prototype.scanContentModelDecl = function() {
-    var regexp = new RegExp("[%>]");
-    var model = this.reader.nextCharRegExp(regexp);
+    let regexp = new RegExp("[%>]");
+    let model = this.reader.nextCharRegExp(regexp);
     while (this.reader.matchChar("%")) {
         this.includeParameterEntity();
         model += this.reader.nextCharRegExp(regexp);
@@ -1061,7 +1061,7 @@ SAXScanner.prototype.scanAttlistDecl = function() {
             this.includeParameterEntity();
             this.reader.skipWhiteSpaces();
         }
-        var eName = this.scanName();
+        let eName = this.scanName();
         this.reader.skipWhiteSpaces();
         while (this.reader.unequals(">")) {
             this.scanAttDef(eName);
@@ -1085,17 +1085,17 @@ SAXScanner.prototype.scanAttDef = function(eName) {
         this.includeParameterEntity();
         this.reader.skipWhiteSpaces();
     }
-    var aName = this.scanName();
+    let aName = this.scanName();
     this.reader.skipWhiteSpaces();
-    var type = this.scanAttType();
+    let type = this.scanAttType();
     this.reader.skipWhiteSpaces();
     //DefaultDecl
-    var mode = null;
+    let mode = null;
     if (this.reader.equals("#")) {
         mode = this.reader.nextCharRegExp(new RegExp(WS_CHAR+"|>"));
         this.reader.skipWhiteSpaces();
     }
-    var attValue = null;
+    let attValue = null;
     if (mode === null || mode === "#FIXED") {
         //attValue
         //here % is included and parsed
@@ -1104,7 +1104,7 @@ SAXScanner.prototype.scanAttDef = function(eName) {
             this.reader.skipWhiteSpaces();
         }
         if (this.reader.equals('"') || this.reader.equals("'")) {
-            var quote = this.reader.next();
+            let quote = this.reader.next();
             attValue = this.reader.nextCharRegExp(new RegExp("[" + quote + "<]"));
             if (this.reader.equals("<")) {
                 this.saxEvents.fatalError("invalid attribute value, must not contain &lt;", this);
@@ -1132,7 +1132,7 @@ SAXScanner.prototype.scanAttDef = function(eName) {
 [7]   	           Nmtoken	   ::=   	(NameChar)+
 */
 SAXScanner.prototype.scanAttType = function() {
-    var type;
+    let type;
     //Enumeration
     if (this.reader.matchChar("(")) {
         this.reader.skipWhiteSpaces();
@@ -1168,7 +1168,7 @@ SAXScanner.prototype.scanAttType = function() {
         type = "NOTATION (" + type + ")";
     // StringType | TokenizedType
     } else {
-        var regexp = new RegExp("[" + WS_CHARS + "%]");
+        let regexp = new RegExp("[" + WS_CHARS + "%]");
         type = this.reader.nextCharRegExp(regexp);
         //if found a "%" must replace it, EntityRef are not replaced here, but char ref are replaced
         while (this.reader.matchChar("%")) {
@@ -1190,9 +1190,9 @@ SAXScanner.prototype.scanAttType = function() {
 SAXScanner.prototype.scanNotationDecl = function() {
     if (this.reader.matchStr("NOTATION")) {
         this.reader.skipWhiteSpaces();
-        var name = this.scanName();
+        let name = this.scanName();
         this.reader.skipWhiteSpaces();
-        var externalId = new ExternalId();
+        let externalId = new ExternalId();
         // here there may be only PubidLiteral after PUBLIC so can not use directly scanExternalId
         if (this.reader.matchStr("PUBLIC")) {
             this.reader.skipWhiteSpaces();
@@ -1230,10 +1230,10 @@ if called from an attribute parsing defaultPrefix would be null
 [5]  Name ::= Letter | '_' | ':') (NameChar)*
 */
 SAXScanner.prototype.scanQName = function(defaultPrefix) {
-    var name = this.scanName();
-    var localName = name;
+    let name = this.scanName();
+    let localName = name;
     if (name.indexOf(":") !== -1) {
-        var splitResult = name.split(":");
+        let splitResult = name.split(":");
         defaultPrefix = splitResult[0];
         localName = splitResult[1];
     }
@@ -1242,17 +1242,17 @@ SAXScanner.prototype.scanQName = function(defaultPrefix) {
 };
 
 SAXScanner.prototype.scanElement = function() {
-    var qName = this.scanQName("");
+    let qName = this.scanQName("");
     this.elementsStack.push(qName.qName);
-    var atts = this.scanAttributes(qName);
-    var namespaceURI = null;
+    let atts = this.scanAttributes(qName);
+    let namespaceURI = null;
     try {
         namespaceURI = this.namespaceSupport.getURI(qName.prefix);
     } catch(e) {
         //should be a PrefixNotFoundException but not specified so no hypothesis
         this.saxEvents.error("namespace of element : [" + qName.qName + "] not found", this);
     }
-    var selfClosed = false;
+    let selfClosed = false;
     if (this.reader.matchChar("/")) {
         if (this.reader.equals(">")) {
             selfClosed = true;
@@ -1274,17 +1274,17 @@ SAXScanner.prototype.scanElement = function() {
 };
 
 SAXScanner.prototype.scanAttributes = function(qName) {
-    var atts = this.saxParser.getAttributesInstance();
+    let atts = this.saxParser.getAttributesInstance();
     //namespaces declared at this step will be stored at one level of global this.namespaces
     this.namespaceSupport.pushContext();
     //same way, in all cases a baseUriAddition is recorded on each level
-    var baseUriAddition = "";
+    let baseUriAddition = "";
     this.scanAttribute(qName, atts);
     //as namespaces are defined only after parsing all the attributes, adds the namespaceURI here
-    var i = atts.getLength();
+    let i = atts.getLength();
     while (i--) {
-        var prefix = atts.getPrefix(i);
-        var namespaceURI = null;
+        let prefix = atts.getPrefix(i);
+        let namespaceURI = null;
         try {
             namespaceURI = this.namespaceSupport.getURI(prefix);
         } catch(e) {
@@ -1309,10 +1309,10 @@ SAXScanner.prototype.scanAttributes = function(qName) {
 SAXScanner.prototype.scanAttribute = function(qName, atts) {
     this.reader.skipWhiteSpaces();
     if (this.reader.unequals(">") && this.reader.unequals("/")) {
-        var attQName = this.scanQName(null);
+        let attQName = this.scanQName(null);
         if (this.reader.matchChar("=")) {
             this.reader.skipWhiteSpaces();
-            var value = this.scanAttValue();
+            let value = this.scanAttValue();
             if (attQName.prefix === "xmlns") {
                 this.namespaceSupport.declarePrefix(attQName.localName, value);
                 this.saxEvents.startPrefixMapping(attQName.localName, value);
@@ -1337,7 +1337,7 @@ SAXScanner.prototype.scanAttribute = function(qName, atts) {
 
 // [10] AttValue ::= '"' ([^<&"] | Reference)* '"' | "'" ([^<&'] | Reference)* "'"
 SAXScanner.prototype.scanAttValue = function() {
-    var attValue, quote;
+    let attValue, quote;
     if (this.reader.equals('"') || this.reader.equals("'")) {
         quote = this.reader.next();
         try {
@@ -1350,7 +1350,7 @@ SAXScanner.prototype.scanAttValue = function() {
             while (this.reader.matchChar("&")) {
                 try {
                     //if character reference, dumped directly without normalization
-                    var charRef = this.scanRef();
+                    let charRef = this.scanRef();
                     if (charRef) {
                         attValue += charRef;
                     }
@@ -1367,7 +1367,7 @@ SAXScanner.prototype.scanAttValue = function() {
 				if (this.reader.equals("'") && quote === "'") {
 					attValue += this.reader.next();
 				}
-                var attValueConcat = this.reader.nextCharRegExp(new RegExp("[" + quote + "<&]"));
+                let attValueConcat = this.reader.nextCharRegExp(new RegExp("[" + quote + "<&]"));
                 //depends on property
                 if (this.saxEvents.attWhitespaceNormalize) {
                     attValueConcat = this.saxEvents.attWhitespaceNormalize(attValueConcat);
@@ -1411,7 +1411,7 @@ ending char is > of ]]>
 SAXScanner.prototype.scanCData = function() {
     if (this.reader.matchStr("[CDATA[")) {
         this.saxEvents.startCDATA();
-        var cdata = this.reader.nextCharWhileNot("]");
+        let cdata = this.reader.nextCharWhileNot("]");
         while (!(this.reader.matchStr("]]>"))) {
             this.reader.nextChar(true);
             cdata += "]" + this.reader.nextCharWhileNot("]");
@@ -1432,7 +1432,7 @@ SAXScanner.prototype.scanCData = function() {
 // [66] CharRef ::= '&#' [0-9]+ ';' | '&#x' [0-9a-fA-F]+ ';'
 // current ch is char after "&#",  returned current char is after ";"
 SAXScanner.prototype.scanCharRef = function() {
-    var replacement, charCode = "";
+    let replacement, charCode = "";
     if (this.reader.matchChar("x")) {
         while (this.reader.unequals(";")) {
             var ch = this.reader.next();
@@ -1473,7 +1473,7 @@ SAXScanner.prototype.scanCharRef = function() {
 */
 SAXScanner.prototype.scanEntityRef = function() {
     try {
-        var entityName = this.scanName();
+        let entityName = this.scanName();
         this.reader.skipWhiteSpaces();
         //current char must be ';'
         if (this.reader.unequals(";")) {
@@ -1490,7 +1490,7 @@ SAXScanner.prototype.scanEntityRef = function() {
         if (entityName.search(APOS_ENTITY) !== -1) {
             this.includeText("'");
         } else {
-            var replacement = this.entities[entityName];
+            let replacement = this.entities[entityName];
             if (replacement === undefined) {
                 throw new InternalEntityNotFoundException(entityName);
             }
@@ -1508,14 +1508,14 @@ SAXScanner.prototype.scanEntityRef = function() {
 
 // [42] ETag ::= '</' Name S? '>'
 SAXScanner.prototype.scanEndingTag = function() {
-    var qName = this.scanQName("");
-    var namespaceURI = null;
+    let qName = this.scanQName("");
+    let namespaceURI = null;
     try {
         namespaceURI = this.namespaceSupport.getURI(qName.prefix);
     } catch(e) {
         this.saxEvents.error("namespace of ending tag : [" + qName.qName + "] not found", this);
     }
-    var currentElement = this.elementsStack.pop();
+    let currentElement = this.elementsStack.pop();
     if (qName.qName === currentElement) {
         if (this.reader.matchChar(">")) {
             this.endMarkup(namespaceURI, qName);
@@ -1533,8 +1533,8 @@ SAXScanner.prototype.scanEndingTag = function() {
 
 
 SAXScanner.prototype.endMarkup = function(namespaceURI, qName) {
-    var namespacesRemoved = this.namespaceSupport.popContext();
-    for (var i in namespacesRemoved) {
+    let namespacesRemoved = this.namespaceSupport.popContext();
+    for (let i in namespacesRemoved) {
         this.saxEvents.endPrefixMapping(i);
     }
     this.relativeBaseUris.pop();

@@ -29,7 +29,7 @@
 
 // Private helpers for AttributesImpl (private static treated as private instance below)
 function _getIndexByQName(qName) {
-    var i = this.attsArray.length;
+    let i = this.attsArray.length;
     while (i--) {
         if (this.attsArray[i].qName === qName) {
             return i;
@@ -38,7 +38,7 @@ function _getIndexByQName(qName) {
     return -1;
 }
 function _getIndexByURI(uri, localName) {
-    var i = this.attsArray.length;
+    let i = this.attsArray.length;
     while (i--) {
         if (this.attsArray[i].namespaceURI === uri && this.attsArray[i].localName === localName) {
             return i;
@@ -50,7 +50,7 @@ function _getValueByIndex(index) {
     return this.attsArray[index] ? this.attsArray[index].value : null;
 }
 function _getValueByQName(qName) {
-    var i = this.attsArray.length;
+    let i = this.attsArray.length;
     while (i--) {
         if (this.attsArray[i].qName === qName) {
             return this.attsArray[i].value;
@@ -59,7 +59,7 @@ function _getValueByQName(qName) {
     return null;
 }
 function _getValueByURI(uri, localName) {
-    var i = this.attsArray.length;
+    let i = this.attsArray.length;
     while (i--) {
         if (this.attsArray[i].namespaceURI === uri && this.attsArray[i].localName === localName) {
             return this.attsArray[i].value;
@@ -69,7 +69,7 @@ function _getValueByURI(uri, localName) {
 }
 
 function _getPrefix(localName, qName) {
-    var prefix = null;
+    let prefix = null;
     if (localName.length !== qName.length) {
         prefix = qName.split(":")[0];
     }
@@ -129,7 +129,7 @@ AttributesImpl.prototype.getType = function(arg1, arg2) { // Should allow 1-2 ar
     // "For an enumerated attribute that is not a notation, the parser will report the type as 'NMTOKEN'."
     // If uri and localName passed, should return the "attribute type as a string, or null if the attribute is not in the list or if Namespace processing is not being performed."
     // If qName passed, should return the "attribute type as a string, or null if the attribute is not in the list or if qualified names are not available."
-    var index;
+    let index;
     if (!arg2) {
         if (arg1) {
             //if it is an index, otherwise should return NaN
@@ -144,7 +144,7 @@ AttributesImpl.prototype.getType = function(arg1, arg2) { // Should allow 1-2 ar
         index = _getIndexByURI.call(this, arg1, arg2);
     }
     if (index || index === 0) {
-        var type = this.attsArray[index].type;
+        let type = this.attsArray[index].type;
         if (type) {
             return type;
         }
@@ -167,7 +167,7 @@ AttributesImpl.prototype.getValue = function(arg1, arg2) {
 };
 // Other AttributesImpl methods
 AttributesImpl.prototype.addAttribute = function (uri, localName, qName, type, value) {
-    var prefix = _getPrefix.call(this, localName, qName);
+    let prefix = _getPrefix.call(this, localName, qName);
     this.addPrefixedAttribute(uri, prefix, localName, qName, type, value);
 };
 AttributesImpl.prototype.clear = function () {
@@ -178,7 +178,7 @@ AttributesImpl.prototype.removeAttribute = function (index) {
 };
 
 AttributesImpl.prototype.addAttributeAtIndex = function (index, uri, localName, qName, type, value) {
-    var prefix = _getPrefix.call(this, localName, qName);
+    let prefix = _getPrefix.call(this, localName, qName);
     if (index > this.attsArray.length) {
         this.attsArray[index] = new Sax_Attribute(uri, prefix, localName, qName, type, value);
     } else {        
@@ -195,7 +195,7 @@ AttributesImpl.prototype.setAttribute = function (index, uri, localName, qName, 
 };
 
 AttributesImpl.prototype.setAttributes = function (atts) {
-    for (var i = 0 ; i < atts.getLength() ; i ++) {
+    for (let i = 0 ; i < atts.getLength() ; i ++) {
         this.addPrefixedAttribute(atts.getURI(i), atts.getPrefix(i), atts.getLocalName(i), atts.getType(i), atts.getValue(i));
     }
 };
@@ -204,10 +204,10 @@ AttributesImpl.prototype.setLocalName = function (index, localName) {
     this.attsArray[index].localName = localName;
 };
 AttributesImpl.prototype.setQName = function (index, qName) {
-    var att = this.attsArray[index];
+    let att = this.attsArray[index];
     att.qName = qName;
     if (qName.indexOf(":") !== -1) {
-        var splitResult = qName.split(":");
+        let splitResult = qName.split(":");
         att.prefix = splitResult[0];
         att.localName = splitResult[1];
     } else {
@@ -242,7 +242,7 @@ function Attributes2Impl (atts) {
     AttributesImpl.call(this, atts);
     if (atts) {
         //by default, isDeclared is false and isSpecified is false
-        for (var i = 0 ; i < atts.getLength() ; i ++) {
+        for (let i = 0 ; i < atts.getLength() ; i ++) {
             this.setDeclared(atts.isDeclared(i));
             this.setSpecified(atts.isSpecified(i));
         }
@@ -272,7 +272,7 @@ Attributes2Impl.prototype = new AttributesImpl();
 */
 // Private helpers for Attributes2Impl (private static treated as private instance below)
 function _getIndex(arg1, arg2) {
-    var index;
+    let index;
     if (arg2 === undefined) {
         if (typeof arg1 === "string") {
             index = _getIndexByQName.call(this, arg1);
@@ -286,12 +286,12 @@ function _getIndex(arg1, arg2) {
 }
 
 Attributes2Impl.prototype.isDeclared = function (indexOrQNameOrURI, localName) {
-    var index = _getIndex(indexOrQNameOrURI, localName);
+    let index = _getIndex(indexOrQNameOrURI, localName);
     return this.attsArray[index].declared;
 };
 
 Attributes2Impl.prototype.isSpecified = function (indexOrQNameOrURI, localName) {
-    var index = _getIndex(indexOrQNameOrURI, localName);
+    let index = _getIndex(indexOrQNameOrURI, localName);
     return this.attsArray[index].specified;
 };
 
@@ -309,10 +309,10 @@ void 	removeAttribute(int index)
           Assign a value to the "specified" flag of a specific attribute.
  **/
 Attributes2Impl.prototype.addAttribute = function (uri, localName, qName, type, value) {
-    var prefix = _getPrefix.call(this, localName, qName);
+    let prefix = _getPrefix.call(this, localName, qName);
     this.addPrefixedAttribute(uri, prefix, localName, qName, type, value);
     //index of just added attribute is atts.getLength - 1
-    var index = this.getLength() - 1;
+    let index = this.getLength() - 1;
     //by default declared is false, and specified is true
     this.setDeclared(index, false);
     this.setSpecified(index, true);

@@ -29,7 +29,7 @@ Serializer.prototype.startElement = function(namespaceURI, localName, qName, att
     }
     this.currentPrefixMapping = {};
     for (i = 0 ; i < atts.getLength() ; i++) {
-        var value = atts.getValue(i);
+        let value = atts.getValue(i);
         value = value.replace(/\n/g, "&#10;");
         value = value.replace(/\r/g, "&#13;");
         value = value.replace(/\t/g, "&#9;");
@@ -54,8 +54,8 @@ Serializer.prototype.processingInstruction = function(target, data) {
 };
 
 Serializer.prototype.ignorableWhitespace = function(ch, start, length) {
-    for (var i = 0; i < ch.length; i++) {
-        var charCode = ch.charCodeAt(i);
+    for (let i = 0; i < ch.length; i++) {
+        let charCode = ch.charCodeAt(i);
         if (charCode !== 32) {
             this.string += "&#" + ch.charCodeAt(i) + ";";
         } else {

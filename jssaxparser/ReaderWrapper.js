@@ -9,16 +9,16 @@ function ReaderWrapper(reader) {
 ReaderWrapper.WS = new RegExp('[\\t\\n\\r ]');
 
 ReaderWrapper.prototype.peekLen = function (len) {
-    var peekedLen = this.peeked.length;
+    let peekedLen = this.peeked.length;
     if (len <= peekedLen) {
         return this.peeked.slice(-len).reverse().join("");
     }
-    var returned = this.peeked.slice(0).reverse().join("");
-    var lenToRead = len - peekedLen;
+    let returned = this.peeked.slice(0).reverse().join("");
+    let lenToRead = len - peekedLen;
     //completes with read characters from reader
-    var newRead = this.reader.read(returned, 0, lenToRead);
+    let newRead = this.reader.read(returned, 0, lenToRead);
     returned += newRead;
-    for (var i = 0; i < lenToRead; i++) {
+    for (let i = 0; i < lenToRead; i++) {
         this.peeked.unshift(newRead.charAt(i));
     }
     return returned;
@@ -54,11 +54,11 @@ if peeked buffer is not empty take the first one
 else take next char of Reader and keep it in peeked
 */
 ReaderWrapper.prototype.peek = function () {
-    var peekedLen = this.peeked.length;
+    let peekedLen = this.peeked.length;
     if (peekedLen !== 0) {
          return this.peeked[peekedLen - 1];
     }
-    var returned = this.reader.read();
+    let returned = this.reader.read();
     this.peeked[0] = returned;
     return returned;
 };
@@ -85,11 +85,11 @@ ending char is the last matching the regexp
 return consumed chars
 */
 ReaderWrapper.prototype.nextCharRegExp = function(regExp, continuation) {
-    var returned = "", currChar = this.peek();
+    let returned = "", currChar = this.peek();
     while (true) {
         if (currChar.search(regExp) !== -1) {
             if (continuation && currChar.search(continuation.pattern) !== -1) {
-                var cb = continuation.cb.call(this);
+                let cb = continuation.cb.call(this);
                 if (cb !== true) {
                     return cb;
                 }
@@ -112,7 +112,7 @@ same as above but with a char not a regexp and no continuation
 best for performance
 */
 ReaderWrapper.prototype.nextCharWhileNot = function(ch) {
-    var returned = "", currChar = this.peek();
+    let returned = "", currChar = this.peek();
     while (currChar !== ch) {
         returned += currChar;
         this.next();
@@ -125,7 +125,7 @@ ReaderWrapper.prototype.nextCharWhileNot = function(ch) {
 
 */
 ReaderWrapper.prototype.matchRegExp = function(len, regExp, dontConsume) {
-    var follow = this.peekLen(len);
+    let follow = this.peekLen(len);
     if (follow.search(regExp) === 0) {
         if (!dontConsume) {
             this.skip(len);
@@ -138,8 +138,8 @@ ReaderWrapper.prototype.matchRegExp = function(len, regExp, dontConsume) {
 /*
 */
 ReaderWrapper.prototype.matchStr = function(str) {
-    var len = str.length;
-    var follow = this.peekLen(len);
+    let len = str.length;
+    let follow = this.peekLen(len);
     if (follow === str) {
         this.skip(len);
         return true;
@@ -162,8 +162,8 @@ beginnnig before quote
 ending after quote
 */
 ReaderWrapper.prototype.quoteContent = function() {
-    var quote = this.next();
-    var content = this.nextCharWhileNot(quote);
+    let quote = this.next();
+    let content = this.nextCharWhileNot(quote);
     this.next();
     return content;
 };
@@ -177,7 +177,7 @@ ReaderWrapper.prototype.unequals = function(ch) {
 };
 
 ReaderWrapper.prototype.unread = function (str) {
-    var i = str.length;
+    let i = str.length;
     //http://www.scottlogic.co.uk/2010/10/javascript-array-performance/
     while (i--) {
         this.peeked[this.peeked.length] = str.charAt(i);

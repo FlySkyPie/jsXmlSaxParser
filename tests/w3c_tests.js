@@ -7,9 +7,9 @@ function throwNotFatalException(errorHandler) {
 }
 
 function testParse_xmlconf() {
-    var contentHandler = new DomContentHandler();
+    let contentHandler = new DomContentHandler();
     contentHandler.setDocumentLocator(new Locator2Impl());
-    var saxParser = XMLReaderFactory.createXMLReader();
+    let saxParser = XMLReaderFactory.createXMLReader();
     saxParser.setFeature('http://apache.org/xml/features/nonvalidating/load-external-dtd', true);
     saxParser.setHandler(contentHandler);
     testCt++;
@@ -23,9 +23,9 @@ function testParse_xmlconf() {
 }
 
 function parseTestCase(uri, strictChars) {
-    var contentHandler2 = new DefaultHandler2();
+    let contentHandler2 = new DefaultHandler2();
     contentHandler2.setDocumentLocator(new Locator2Impl());
-    var saxParser2 = XMLReaderFactory.createXMLReader();
+    let saxParser2 = XMLReaderFactory.createXMLReader();
     saxParser2.setFeature('http://apache.org/xml/features/nonvalidating/load-external-dtd', true);
     saxParser2.setHandler(contentHandler2);
     if (strictChars) {
@@ -39,9 +39,9 @@ function parseTestCase(uri, strictChars) {
 
 
 function parseTestCaseError(uri, strictChars) {
-    var contentHandler2 = new DefaultHandler2();
+    let contentHandler2 = new DefaultHandler2();
     contentHandler2.setDocumentLocator(new Locator2Impl());
-    var saxParser2 = XMLReaderFactory.createXMLReader();
+    let saxParser2 = XMLReaderFactory.createXMLReader();
     saxParser2.setFeature('http://apache.org/xml/features/nonvalidating/load-external-dtd', true);
     saxParser2.setHandler(contentHandler2);
     if (strictChars) {
@@ -53,9 +53,9 @@ function parseTestCaseError(uri, strictChars) {
 }
 
 function parseTestCase_invalid(uri, strictChars) {
-    var contentHandler2 = new DefaultHandler2();
+    let contentHandler2 = new DefaultHandler2();
     contentHandler2.setDocumentLocator(new Locator2Impl());
-    var saxParser2 = XMLReaderFactory.createXMLReader();
+    let saxParser2 = XMLReaderFactory.createXMLReader();
     saxParser2.setHandler(contentHandler2);
     saxParser2.setFeature('http://xml.org/sax/features/validation', true);
     saxParser2.setFeature('http://apache.org/xml/features/nonvalidating/load-external-dtd', true);
@@ -70,9 +70,9 @@ function parseTestCase_invalid(uri, strictChars) {
 
 
 function parseTestCase_valid(uri, validOutput, strictChars) {
-    var serializer = new Serializer();
+    let serializer = new Serializer();
     serializer.setDocumentLocator(new Locator2Impl());
-    var saxParser2 = XMLReaderFactory.createXMLReader();
+    let saxParser2 = XMLReaderFactory.createXMLReader();
     saxParser2.setHandler(serializer);
     saxParser2.setFeature('http://xml.org/sax/features/validation', true);
     saxParser2.setFeature('http://apache.org/xml/features/nonvalidating/load-external-dtd', true);
@@ -84,7 +84,7 @@ function parseTestCase_valid(uri, validOutput, strictChars) {
         saxParser2.parse(new InputSource(uri));
     } finally {}
     if (validOutput) {
-        var expected = loadFile(validOutput);
+        let expected = loadFile(validOutput);
         if (expected !== serializer.string) {
             throw new SAXException("serialization output not correct : " + diffString(expected, serializer.string));
         }
@@ -94,8 +94,8 @@ function parseTestCase_valid(uri, validOutput, strictChars) {
 
     
 function print_total_errs () {  
-    var hr = document.createElementNS('http://www.w3.org/1999/xhtml', 'hr');
-    var p = document.createElementNS('http://www.w3.org/1999/xhtml', 'p');
+    let hr = document.createElementNS('http://www.w3.org/1999/xhtml', 'hr');
+    let p = document.createElementNS('http://www.w3.org/1999/xhtml', 'p');
     testResultSummary = p.innerHTML = 'Total test failures: '+failedCt+'; Total not supported notices: '+notSupportedCt+'; Total tests: '+testCt;
     p.style.border = 'solid black 2px';
     p.style.fontSize = '20px';
@@ -107,9 +107,9 @@ function prepareTestParse(testCaseId) {
     if (!xmlConf) {
         testParse_xmlconf();
     }
-    var testSuite = getFirstChildElement(xmlConf, "TESTSUITE");
-    var i = 0;
-    var testcase;
+    let testSuite = getFirstChildElement(xmlConf, "TESTSUITE");
+    let i = 0;
+    let testcase;
     for (testcase = getFirstChildElement(testSuite, "TESTCASES"); testcase && i < testCaseId ; testcase = getNextSiblingElement(testcase, "TESTCASES")) {
         i++;
     }
@@ -118,37 +118,37 @@ function prepareTestParse(testCaseId) {
 }
 
 function removeFileName(path) {
-    var idx = path.lastIndexOf('/');
+    let idx = path.lastIndexOf('/');
     return path.substring(0, idx + 1);
 }
 
 function getBaseUri(node, uri) {
     //remove eventual file name at the end of the path
-    var baseUri = removeFileName(node.custBaseURI);
+    let baseUri = removeFileName(node.custBaseURI);
     return baseUri + uri;
 }
 
 function testParse_valid(testCaseId) {
-    var tests = prepareTestParse(testCaseId);
-    for (var i = 0 ; i < tests.length ; i++) {
-        var test = tests.item(i);
-        var type = test.getAttribute("TYPE");
+    let tests = prepareTestParse(testCaseId);
+    for (let i = 0 ; i < tests.length ; i++) {
+        let test = tests.item(i);
+        let type = test.getAttribute("TYPE");
         if (type === "valid") {
             testCt++;
-            var uri = test.getAttribute("URI");
-            var parentUri = removeFileName(test.custBaseURI);
-            var uriBased = parentUri + uri;
-            var outputAttr = test.getAttribute("OUTPUT");
+            let uri = test.getAttribute("URI");
+            let parentUri = removeFileName(test.custBaseURI);
+            let uriBased = parentUri + uri;
+            let outputAttr = test.getAttribute("OUTPUT");
             var validOutput;
             if (outputAttr) {
                 validOutput = parentUri + outputAttr;
             }
-            var testLabel = textContent(test);
+            let testLabel = textContent(test);
             try {
                 parseTestCase_valid(uriBased, validOutput);
                 output.innerHTML += "<tr><td>" + uri + "<\/td><td>" + testLabel + "<\/td><td>valid<\/td><\/tr>";
             } catch(e) {
-                var conformance = isAssumedNotConformant(uri);
+                let conformance = isAssumedNotConformant(uri);
                 if (conformance) {
                     notSupportedCt++;
                     output.innerHTML += "<tr style=\"background-color: orange\"><td>" + uri + "<\/td><td>" + testLabel + "<\/td><td>" + conformance + "<\/td><\/tr>";
@@ -162,15 +162,15 @@ function testParse_valid(testCaseId) {
 }
     
 function testParse_invalid(testCaseId) {
-    var tests = prepareTestParse(testCaseId);    
-    for (var i = 0 ; i < tests.length ; i++) {
-        var test = tests.item(i);
-        var type = test.getAttribute("TYPE");
+    let tests = prepareTestParse(testCaseId);    
+    for (let i = 0 ; i < tests.length ; i++) {
+        let test = tests.item(i);
+        let type = test.getAttribute("TYPE");
         if (type === "invalid") {
             testCt++;
-            var uri = test.getAttribute("URI");
-            var uriBased = getBaseUri(test, uri);
-            var testLabel = textContent(test);
+            let uri = test.getAttribute("URI");
+            let uriBased = getBaseUri(test, uri);
+            let testLabel = textContent(test);
             try {
                 parseTestCase_invalid(uriBased);
                 //should have been exceptions
@@ -182,7 +182,7 @@ function testParse_invalid(testCaseId) {
                 } else if (e instanceof SAXException) {
                     output.innerHTML += "<tr><td>" + uri + "<\/td><td>" + testLabel + "<\/td><td>" + e.message + "<\/td><\/tr>";
                 } else {
-                    var conformance = isAssumedNotConformant(uri);
+                    let conformance = isAssumedNotConformant(uri);
                     if (conformance) {
                         notSupportedCt++;
                         output.innerHTML += "<tr style=\"background-color: orange\"><td>" + uri + "<\/td><td>" + testLabel + "<\/td><td>" + conformance + "<\/td><\/tr>";
@@ -199,15 +199,15 @@ function testParse_invalid(testCaseId) {
 
 
 function testParse_not_wf(testCaseId) {
-    var tests = prepareTestParse(testCaseId);
-    for (var i = 0 ; i < tests.length ; i++) {
-        var test = tests.item(i);
-        var type = test.getAttribute("TYPE");
+    let tests = prepareTestParse(testCaseId);
+    for (let i = 0 ; i < tests.length ; i++) {
+        let test = tests.item(i);
+        let type = test.getAttribute("TYPE");
         if (type === "not-wf") {
             testCt++;
-            var uri = test.getAttribute("URI");
-            var uriBased = getBaseUri(test, uri);
-            var testLabel = textContent(test);
+            let uri = test.getAttribute("URI");
+            let uriBased = getBaseUri(test, uri);
+            let testLabel = textContent(test);
             try {
                 parseTestCase(uriBased, testForStrictCharacterData(uri));
                 //should have been exceptions
@@ -219,7 +219,7 @@ function testParse_not_wf(testCaseId) {
                 } else if (e instanceof SAXException) {
                     output.innerHTML += "<tr><td>" + uri + "<\/td><td>" + testLabel + "<\/td><td>" + e.message + "<\/td><\/tr>";
                 } else {
-                    var conformance = isAssumedNotConformant(uri);
+                    let conformance = isAssumedNotConformant(uri);
                     if (conformance) {
                         notSupportedCt++;
                         output.innerHTML += "<tr style=\"background-color: orange\"><td>" + uri + "<\/td><td>" + testLabel + "<\/td><td>" + conformance + "<\/td><\/tr>";
@@ -234,15 +234,15 @@ function testParse_not_wf(testCaseId) {
 }
 
 function testParse_error(testCaseId) {
-    var tests = prepareTestParse(testCaseId);
-    for (var i = 0 ; i < tests.length ; i++) {
-        var test = tests.item(i);
-        var type = test.getAttribute("TYPE");
+    let tests = prepareTestParse(testCaseId);
+    for (let i = 0 ; i < tests.length ; i++) {
+        let test = tests.item(i);
+        let type = test.getAttribute("TYPE");
         if (type === "error") {
             testCt++;
-            var uri = test.getAttribute("URI");
-            var uriBased = getBaseUri(test, uri);
-            var testLabel = textContent(test);
+            let uri = test.getAttribute("URI");
+            let uriBased = getBaseUri(test, uri);
+            let testLabel = textContent(test);
             try {
                 parseTestCaseError(uriBased, testForStrictCharacterData(uri));
                 //should have been exceptions
@@ -254,7 +254,7 @@ function testParse_error(testCaseId) {
                 } else if (e instanceof SAXException) {
                     output.innerHTML += "<tr><td>" + uri + "<\/td><td>" + testLabel + "<\/td><td>" + e.message + "<\/td><\/tr>";
                 } else {
-                    var conformance = isAssumedNotConformant(uri);
+                    let conformance = isAssumedNotConformant(uri);
                     if (conformance) {
                         notSupportedCt++;
                         output.innerHTML += "<tr style=\"background-color: orange\"><td>" + uri + "<\/td><td>" + testLabel + "<\/td><td>" + conformance + "<\/td><\/tr>";

@@ -13,7 +13,7 @@ jsUnitTestSuite.prototype.addTestPage = function (pageName)
 
 jsUnitTestSuite.prototype.addTestSuite = function (suite) 
 {
-  for (var i = 0; i < suite.testPages.length; i++)
+  for (let i = 0; i < suite.testPages.length; i++)
     this.addTestPage(suite.testPages[i]);
 }
 
@@ -34,7 +34,7 @@ jsUnitTestSuite.prototype.hasMorePages = function ()
 
 jsUnitTestSuite.prototype.clone = function ()
 {
-  var clone = new jsUnitTestSuite();
+  let clone = new jsUnitTestSuite();
   clone.testPages = this.testPages;
   return clone;
 }

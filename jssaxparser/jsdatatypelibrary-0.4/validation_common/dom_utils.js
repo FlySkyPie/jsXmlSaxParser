@@ -12,8 +12,8 @@ DOCUMENT_FRAGMENT_NODE = 11;
 NOTATION_NODE = 12;
 
 function cloneArray(array) {
-	var clone = [];
-        var i = array.length;
+	let clone = [];
+        let i = array.length;
         while (i--) {
 		clone[i] = array[i];
 	}
@@ -27,7 +27,7 @@ function cloneArray(array) {
  */
 
 function applyXpath(domNode,xpath) {
-    var inputs = new Array();
+    let inputs = new Array();
     // code for IE
     if (window.ActiveXObject) {
         domNode.ownerDocument.setProperty("SelectionLanguage","XPath");
@@ -35,8 +35,8 @@ function applyXpath(domNode,xpath) {
     }
     // code for Mozilla, Firefox, Opera, etc.
     else if (document.implementation && document.implementation.createDocument) {
-        var nodes = document.evaluate(xpath, domNode, null, XPathResult.ANY_TYPE,null);
-        var result = nodes.iterateNext();
+        let nodes = document.evaluate(xpath, domNode, null, XPathResult.ANY_TYPE,null);
+        let result = nodes.iterateNext();
         while (result) {
             inputs.push(result);
             result = nodes.iterateNext();
@@ -49,7 +49,7 @@ function applyXpath(domNode,xpath) {
  get the first ancestor with that tag name and that class name
  */
 function getFirstAncestorByTagAndClass(domNode,tagName,className) {
-    var ancestor = domNode.parentNode;
+    let ancestor = domNode.parentNode;
     while (ancestor) {
         if ((ancestor.tagName) && (ancestor.tagName.toLowerCase() == tagName)
         && (ancestor.className) && (ancestor.className.toLowerCase() == className)) {
@@ -65,8 +65,8 @@ function getFirstAncestorByTagAndClass(domNode,tagName,className) {
  returns true when the selection has been made, false otherwise
  */
 function setSelected(select,optionName) {
-    var optionTags = select.getElementsByTagName('option');
-    for (var i=0 ; i<optionTags.length ; i++) {
+    let optionTags = select.getElementsByTagName('option');
+    for (let i=0 ; i<optionTags.length ; i++) {
         if (optionTags[i].getAttribute("value") == optionName) {
             select.selectedIndex = i;
             return true;
@@ -80,7 +80,7 @@ function setSelected(select,optionName) {
  the <select> whose id is selectElementId
  */
 function getSelected(selectId) {
-    var select = document.getElementById(selectId);
+    let select = document.getElementById(selectId);
     return select.options[select.selectedIndex].value;
 }
 
@@ -93,7 +93,7 @@ function isDisplayed(domNode) {
         return false;
     }
     //checks that all the <div> ancestors of this node are really displayed
-    var ancestor = domNode.parentNode;
+    let ancestor = domNode.parentNode;
     while (ancestor) {
         if ((ancestor.tagName) && (ancestor.tagName.toLowerCase() == 'div')
         && (ancestor.style) && (ancestor.style.display)
@@ -112,17 +112,17 @@ function isDisplayed(domNode) {
   Free to use if this text is included
  */
 function getElementsByAttribute(oElm, strTagName, strAttributeName, strAttributeValue) {
-    var arrElements = (strTagName == "*" && document.all)? document.all : oElm.getElementsByTagName(strTagName);
-    var arrReturnElements = new Array();
+    let arrElements = (strTagName == "*" && document.all)? document.all : oElm.getElementsByTagName(strTagName);
+    let arrReturnElements = new Array();
     //MODIFIED to be visible (and understandable)
     //var oAttributeValue = (typeof strAttributeValue != "undefined")? new RegExp("(^|\\s)" + strAttributeValue + "(\\s|$)") : null;
-    var oAttributeValue = null;
+    let oAttributeValue = null;
     if (typeof strAttributeValue != "undefined") {
         oAttributeValue = new RegExp("^" + strAttributeValue + "$");
     }
-    var oCurrent;
-    var oAttribute;
-    for(var i=0; i<arrElements.length; i++) {
+    let oCurrent;
+    let oAttribute;
+    for(let i=0; i<arrElements.length; i++) {
         oCurrent = arrElements[i];
         oAttribute = oCurrent.getAttribute(strAttributeName);
         if (typeof oAttribute == "string" && oAttribute.length > 0) {
@@ -135,9 +135,9 @@ function getElementsByAttribute(oElm, strTagName, strAttributeName, strAttribute
 }
 
 function getElementByTagClassRefs(parentNode, tagName, classValue, refsValue) {
-	var elems = parentNode.getElementsByTagName(tagName);
-	for (var i in elems) {
-		var elem = elems[i];
+	let elems = parentNode.getElementsByTagName(tagName);
+	for (let i in elems) {
+		let elem = elems[i];
 		if (elem.getAttribute && elem.getAttribute("class") == classValue && elem.getAttribute("refs") == refsValue) {
 			return elem;
 		}
@@ -156,7 +156,7 @@ function createDocumentFromText(text) {
     }
     // code for Mozilla, Firefox, Opera, etc.
     else {
-        var parser=new DOMParser();
+        let parser=new DOMParser();
         var doc=parser.parseFromString(text,"text/xml");
     }
     return doc;
@@ -180,8 +180,8 @@ function textContent(node) {
     if (node.textContent) {
         return node.textContent;
     }
-    var result = "";
-    for (var i = 0; i < node.childNodes.length; i++) {
+    let result = "";
+    for (let i = 0; i < node.childNodes.length; i++) {
         switch (node.childNodes[i].nodeType) {
             case 1:
             case 5:
@@ -232,7 +232,7 @@ function getNextSiblingElement(node, tagName) {
 }
 
 function getFirstChildElement(parentNode, tagName) {
-    var node = parentNode.firstChild;
+    let node = parentNode.firstChild;
     while (node && node.nodeType != ELEMENT_NODE) {
         node = node.nextSibling;
     }
@@ -253,7 +253,7 @@ function trim(str) {
 }
 
 function insertAfter(node, ref) {
-    var pn = ref.parentNode;
+    let pn = ref.parentNode;
     if (ref == pn.lastChild) {
         pn.appendChild(node);
     } else {
@@ -269,7 +269,7 @@ function innerXML(node) {
             return node.xml;
         } else {
             if (typeof XMLSerializer != "undefined") {
-                var serializer = new XMLSerializer();
+                let serializer = new XMLSerializer();
                 return serializer.serializeToString(node);
             }
         }
@@ -313,7 +313,7 @@ function getDefaultNamespace(namespaces) {
 }
 
 function getFirstChildTextNode(domNode) {
-    var result = domNode.firstChild;
+    let result = domNode.firstChild;
     while (result) {
         //keeps text node which are not white spaces
         if (result.nodeType == TEXT_NODE && !is_ignorable(result)) {

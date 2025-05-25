@@ -1,12 +1,12 @@
 /* @author Edward Hieatt, edward@jsunit.net */
 
-var JSUNIT_UNDEFINED_VALUE;
-var JSUNIT_VERSION="2.1";
-var isTestPageLoaded = false;
+let JSUNIT_UNDEFINED_VALUE;
+let JSUNIT_VERSION="2.1";
+let isTestPageLoaded = false;
 
 //hack for NS62 bug
 function jsUnitFixTop() {
-  var tempTop = top;
+  let tempTop = top;
   if (!tempTop) {
     tempTop = window;
     while (tempTop.parent) {
@@ -39,7 +39,7 @@ function fail(failureMessage) {
 }
 
 function error(errorMessage) {
-  var errorObject         = new Object();
+  let errorObject         = new Object();
   errorObject.description = errorMessage;
   errorObject.stackTrace  = getStackTrace();
   throw errorObject;
@@ -75,7 +75,7 @@ function _assert(comment, booleanValue, failureMessage) {
 
 function assert() {
   _validateArguments(1, arguments);
-  var booleanValue=nonCommentArg(1, 1, arguments);
+  let booleanValue=nonCommentArg(1, 1, arguments);
 
   if (typeof(booleanValue) != 'boolean')
     error('Bad argument to assert(boolean)');
@@ -85,7 +85,7 @@ function assert() {
 
 function assertTrue() {
   _validateArguments(1, arguments);
-  var booleanValue=nonCommentArg(1, 1, arguments);
+  let booleanValue=nonCommentArg(1, 1, arguments);
 
   if (typeof(booleanValue) != 'boolean')
     error('Bad argument to assertTrue(boolean)');
@@ -95,7 +95,7 @@ function assertTrue() {
 
 function assertFalse() {
   _validateArguments(1, arguments);
-  var booleanValue=nonCommentArg(1, 1, arguments);
+  let booleanValue=nonCommentArg(1, 1, arguments);
 
   if (typeof(booleanValue) != 'boolean')
     error('Bad argument to assertFalse(boolean)');
@@ -105,51 +105,51 @@ function assertFalse() {
 
 function assertEquals() {
   _validateArguments(2, arguments);
-  var var1=nonCommentArg(1, 2, arguments);
-  var var2=nonCommentArg(2, 2, arguments);
+  let var1=nonCommentArg(1, 2, arguments);
+  let var2=nonCommentArg(2, 2, arguments);
   _assert(commentArg(2, arguments), var1 === var2, 'Expected ' + var1 + ' (' + typeof(var1) + ') but was ' + _displayStringForValue(var2) + ' (' + typeof(var2) + ')');
 }
 
 function assertNotEquals() {
   _validateArguments(2, arguments);
-  var var1=nonCommentArg(1, 2, arguments);
-  var var2=nonCommentArg(2, 2, arguments);
+  let var1=nonCommentArg(1, 2, arguments);
+  let var2=nonCommentArg(2, 2, arguments);
   _assert(commentArg(2, arguments), var1 !== var2, 'Expected not to be ' + _displayStringForValue(var2));
 }
 
 function assertNull() {
   _validateArguments(1, arguments);
-  var aVar=nonCommentArg(1, 1, arguments);
+  let aVar=nonCommentArg(1, 1, arguments);
   _assert(commentArg(1, arguments), aVar === null, 'Expected null but was ' + _displayStringForValue(aVar));
 }
 
 function assertNotNull() {
   _validateArguments(1, arguments);
-  var aVar=nonCommentArg(1, 1, arguments);
+  let aVar=nonCommentArg(1, 1, arguments);
   _assert(commentArg(1, arguments), aVar !== null, 'Expected not to be null');
 }
 
 function assertUndefined() {
   _validateArguments(1, arguments);
-  var aVar=nonCommentArg(1, 1, arguments);
+  let aVar=nonCommentArg(1, 1, arguments);
   _assert(commentArg(1, arguments), aVar === top.JSUNIT_UNDEFINED_VALUE, 'Expected undefined but was ' + _displayStringForValue(aVar));
 }
 
 function assertNotUndefined() {
   _validateArguments(1, arguments);
-  var aVar=nonCommentArg(1, 1, arguments);
+  let aVar=nonCommentArg(1, 1, arguments);
   _assert(commentArg(1, arguments), aVar !== top.JSUNIT_UNDEFINED_VALUE, 'Expected not to be undefined');
 }
 
 function assertNaN() {
   _validateArguments(1, arguments);
-  var aVar=nonCommentArg(1, 1, arguments);
+  let aVar=nonCommentArg(1, 1, arguments);
   _assert(commentArg(1, arguments), isNaN(aVar), 'Expected NaN');
 }
 
 function assertNotNaN() {
   _validateArguments(1, arguments);
-  var aVar=nonCommentArg(1, 1, arguments);
+  let aVar=nonCommentArg(1, 1, arguments);
   _assert(commentArg(1, arguments), !isNaN(aVar), 'Expected not NaN');
 }
 
@@ -164,7 +164,7 @@ function tearDown() {
 }
 
 function getFunctionName(aFunction) {
-  var name = aFunction.toString().match(/function (\w*)/)[1];
+  let name = aFunction.toString().match(/function (\w*)/)[1];
 
   if ((name == null) || (name.length == 0))
     name = 'anonymous';
@@ -173,10 +173,10 @@ function getFunctionName(aFunction) {
 }
 
 function getStackTrace() {
-  var result = '';
+  let result = '';
 
   if (typeof(arguments.caller) != 'undefined') { // IE, not ECMA
-    for (var a = arguments.caller; a != null; a = a.caller) {
+    for (let a = arguments.caller; a != null; a = a.caller) {
       result += '> ' + getFunctionName(a.callee) + '\n';
       if (a.caller == a) {
         result += '*';
@@ -186,15 +186,15 @@ function getStackTrace() {
   }
   else { // Mozilla, not ECMA
     // fake an exception so we can get Mozilla's error stack
-    var testExcp;
+    let testExcp;
     try
     {
       foo.bar;
     }
     catch(testExcp)
     {
-      var stack = parseErrorStack(testExcp);
-      for (var i = 1; i < stack.length; i++)
+      let stack = parseErrorStack(testExcp);
+      for (let i = 1; i < stack.length; i++)
       {
         result += '> ' + stack[i] + '\n';
       }
@@ -206,19 +206,19 @@ function getStackTrace() {
 
 function parseErrorStack(excp)
 {
-  var stack = [];
-  var name;
+  let stack = [];
+  let name;
   
   if (!excp || !excp.stack)
   {
     return stack;
   }
   
-  var stacklist = excp.stack.split('\n');
+  let stacklist = excp.stack.split('\n');
 
-  for (var i = 0; i < stacklist.length - 1; i++)
+  for (let i = 0; i < stacklist.length - 1; i++)
   {
-    var framedata = stacklist[i];
+    let framedata = stacklist[i];
 
     name = framedata.match(/^(\w*)/)[1];
     if (!name) {
@@ -270,8 +270,8 @@ function trim(str) {
   if (str == null) 
     return null;
 
-  var startingIndex = 0;
-  var endingIndex   = str.length-1;
+  let startingIndex = 0;
+  let endingIndex   = str.length-1;
   
   while (str.substring(startingIndex, startingIndex+1) == ' ')
     startingIndex++;
@@ -356,7 +356,7 @@ function newOnLoadEvent() {
 
 function jsUnitSetOnLoad(windowRef, onloadHandler)
 {
-  var isKonqueror = navigator.userAgent.indexOf('Konqueror/') != -1 ||
+  let isKonqueror = navigator.userAgent.indexOf('Konqueror/') != -1 ||
                     navigator.userAgent.indexOf('Safari/')    != -1;
 
   if (typeof(windowRef.attachEvent) != 'undefined') {

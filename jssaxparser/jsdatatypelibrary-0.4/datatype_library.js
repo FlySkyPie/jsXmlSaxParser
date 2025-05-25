@@ -81,7 +81,7 @@ whiteSpace 	Specifies how white space (line feeds, tabs, spaces, and carriage re
         return str.replace(/\\/gm, "\\\\").replace(/([\f\b\n\t\r\[\^$|?*+(){}])/gm, "\\$1");
     }
 
-    var _languageRegExp = new RegExp("^[a-zA-Z]{1,8}(-[a-zA-Z0-9]{1,8})*$"),
+    let _languageRegExp = new RegExp("^[a-zA-Z]{1,8}(-[a-zA-Z0-9]{1,8})*$"),
     _nameStartChar = "A-Z_a-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02FF\u0370-\u037D\u037F-\u1FFF\u0200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD\ud800-\udb7f\udc00-\udfff",
     _nameChar = _nameStartChar + "\\-\\.0-9\u00B7\u0300-\u036F\u203F-\u2040-",
     _nameRegExp = new RegExp("^[:" + _nameStartChar + "][:" + _nameChar + "]*$"),
@@ -166,7 +166,7 @@ function DatatypeLibrary() {
     datatypeAllows ("",  "token") [] _ _ = True
     */
 DatatypeLibrary.prototype.datatypeAllows = function(datatype, paramList, string, context) {
-    var value;
+    let value;
     if (datatype.uri === "http://www.w3.org/2001/XMLSchema-datatypes") {
         /*
 
@@ -334,7 +334,7 @@ DatatypeLibrary.prototype.datatypeAllows = function(datatype, paramList, string,
     datatypeEqual ("",  "token") s1 _ s2 _ = (normalizeWhitespace s1) == (normalizeWhitespace s2)
     */
 DatatypeLibrary.prototype.datatypeEqual = function(datatype, patternString, patternContext, string, context) {
-    var value, patternValue;
+    let value, patternValue;
     if (datatype.uri === "http://www.w3.org/2001/XMLSchema-datatypes") {
         switch (datatype.localName) {
             case "boolean":
@@ -432,11 +432,11 @@ DatatypeLibrary.prototype.datatypeEqual = function(datatype, patternString, patt
 };
 
 DatatypeLibrary.prototype.whitespace = function(string, wsDefault, paramList) {
-    var wsParam = wsDefault;
+    let wsParam = wsDefault;
     if (paramList) {
-        var i = paramList.length;
+        let i = paramList.length;
         while (i--) {
-            var param = paramList[i];
+            let param = paramList[i];
             if (param.localName === "whiteSpace") {
                 wsParam = param.string;
             }
@@ -445,7 +445,7 @@ DatatypeLibrary.prototype.whitespace = function(string, wsDefault, paramList) {
     if (wsParam === _PRESERVE) {
         return string.replace(/[\t\n\r]/g, " ");
     } else if (wsParam === _COLLAPSE) {
-        var value = string.replace(/[\t\n\r ]+/g, " ");
+        let value = string.replace(/[\t\n\r ]+/g, " ");
         //removes leading and trailing space
         return value.replace(/^ /, "").replace(/ $/, "");
     }
@@ -453,11 +453,11 @@ DatatypeLibrary.prototype.whitespace = function(string, wsDefault, paramList) {
 };
 
 DatatypeLibrary.prototype.checkIntegerRange = function(min, max, string, datatype, paramList) {
-    var checkInteger = this.checkRegExp(_integerRegExp, string, datatype);
+    let checkInteger = this.checkRegExp(_integerRegExp, string, datatype);
     if (checkInteger instanceof NotAllowed) {
         return checkInteger;
     }
-    var intValue = parseInt(string, 10);
+    let intValue = parseInt(string, 10);
     //min can be undefined if condition is just inferior
     if (min !== undefined) {
         if (intValue < min) {
@@ -473,7 +473,7 @@ DatatypeLibrary.prototype.checkIntegerRange = function(min, max, string, datatyp
 };
 
 DatatypeLibrary.prototype.checkRegExpAndParams = function(regExp, string, datatype, paramList) {
-    var check = this.checkRegExp(regExp, string, datatype);
+    let check = this.checkRegExp(regExp, string, datatype);
     if (check instanceof NotAllowed) {
         return check;
     }
@@ -499,7 +499,7 @@ DatatypeLibrary.prototype.checkExclusiveRegExp = function(regExp, string, dataty
 
 DatatypeLibrary.prototype.checkPrefixDeclared = function(string, context, datatype) {
     if (string.match(":")) {
-        var prefix = string.split(":")[0];
+        let prefix = string.split(":")[0];
         if (context.map[prefix] === undefined) {
             return new NotAllowed("prefix " + prefix + " not declared", datatype, string, 10);
         }
@@ -508,10 +508,10 @@ DatatypeLibrary.prototype.checkPrefixDeclared = function(string, context, dataty
 };
 
 DatatypeLibrary.prototype.checkParams = function(string, datatype, paramList) {
-    var check;
-    var enumeration = [];
-    for (var i = 0 ; i < paramList.length ; i++) {
-        var param = paramList[i];
+    let check;
+    let enumeration = [];
+    for (let i = 0 ; i < paramList.length ; i++) {
+        let param = paramList[i];
         //gathers enumerations before triggering it
         if (param.localName === "enumeration") {
             enumeration.push(param.string);
@@ -532,7 +532,7 @@ DatatypeLibrary.prototype.checkParams = function(string, datatype, paramList) {
 };
 
 DatatypeLibrary.prototype.checkParam = function(string, param, datatype) {
-    var number, value, check, regExp;
+    let number, value, check, regExp;
     if (param.localName === "length") {
         number = parseInt(param.string, 10);
         if (string.length != number) {
@@ -574,7 +574,7 @@ DatatypeLibrary.prototype.checkParam = function(string, param, datatype) {
         }
     } else if (param.localName === "totalDigits") {
         number = parseInt(param.string, 10);
-        var length = string.replace(/\./, "").length;
+        let length = string.replace(/\./, "").length;
         if (length != number) {
             return new NotAllowed("invalid number of digits, " + param.localName + " is : " + number + ", found : " + length, datatype, string, 10);
         }
@@ -587,7 +587,7 @@ DatatypeLibrary.prototype.checkParam = function(string, param, datatype) {
             return new NotAllowed("invalid number of fraction digits, expected : " + number, check, string, 10);
         }
     } else if (param.localName === "pattern") {
-        var escaped = param.string.replace(/\\/gm, "\\\\");
+        let escaped = param.string.replace(/\\/gm, "\\\\");
         regExp = new RegExp("^" + escaped + "$");
         check = this.checkRegExp(regExp, string, datatype);
         //adds an error message
@@ -599,18 +599,18 @@ DatatypeLibrary.prototype.checkParam = function(string, param, datatype) {
 };
 
 DatatypeLibrary.prototype.checkEnumeration = function(string, enumeration, datatype) {
-    var value;
-    var i = enumeration.length;
+    let value;
+    let i = enumeration.length;
     while (i--) {
         value = enumeration[i];
-        var escaped = _escapeRegExp(value);
-        var regExp = new RegExp("^" + escaped + "$");
-        var check = this.checkRegExp(regExp, string, datatype);
+        let escaped = _escapeRegExp(value);
+        let regExp = new RegExp("^" + escaped + "$");
+        let check = this.checkRegExp(regExp, string, datatype);
         if (check instanceof Empty) {
             return check;
         }
     }
-    var msg = "invalid value : " + string + ", must be one of : [" + enumeration[0];
+    let msg = "invalid value : " + string + ", must be one of : [" + enumeration[0];
     for (i = 1 ; i < enumeration.length ; i++) {
         value = enumeration[i];
         msg += "," + value;

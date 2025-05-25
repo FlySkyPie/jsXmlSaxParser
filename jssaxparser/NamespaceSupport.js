@@ -47,24 +47,24 @@ function NamespaceSupport () {
 }
 
 NamespaceSupport.prototype.declarePrefix = function (prefix, uri) {
-    var namespacesOfThatLevel = this.namespaces[this.namespaces.length - 1];
+    let namespacesOfThatLevel = this.namespaces[this.namespaces.length - 1];
     namespacesOfThatLevel[prefix] = uri;
 };
 NamespaceSupport.prototype.getDeclaredPrefixes = function () {
-    var declaredPrefixes = [];
-    var i = this.namespaces.length;
+    let declaredPrefixes = [];
+    let i = this.namespaces.length;
     while (i--) {
-        for (var prefix in this.namespaces[i]) {
+        for (let prefix in this.namespaces[i]) {
             declaredPrefixes.push(prefix);
         }
     }
     return declaredPrefixes;
 };
 NamespaceSupport.prototype.getPrefix = function (uri) {
-    var i = this.namespaces.length;
+    let i = this.namespaces.length;
     while (i--) {
-        var namespacesOfThatLevel = this.namespaces[i];
-        for (var prefix in namespacesOfThatLevel) {
+        let namespacesOfThatLevel = this.namespaces[i];
+        for (let prefix in namespacesOfThatLevel) {
             if (namespacesOfThatLevel[prefix] === uri) {
                 return prefix;
             }
@@ -83,9 +83,9 @@ NamespaceSupport.prototype.getURI = function (prefix) {
     if (prefix === null) {
         return null;
     }
-    var i = this.namespaces.length;
+    let i = this.namespaces.length;
     while (i--) {
-        var namespaceURI = this.namespaces[i][prefix];
+        let namespaceURI = this.namespaces[i][prefix];
         if (namespaceURI) {
             return namespaceURI;
         }
@@ -107,13 +107,13 @@ NamespaceSupport.prototype.processName = function (qName, parts, isAttribute) {
     throw new SAXNotSupportedException("NamespaceSupport.processName(qName, parts, isAttribute)");
 };
 NamespaceSupport.prototype.pushContext = function () {
-    var namespacesOfThatLevel = {};
+    let namespacesOfThatLevel = {};
     this.namespaces.push(namespacesOfThatLevel);
 };
 NamespaceSupport.prototype.reset = function () {
     /* for each depth, a map of namespaces */
     this.namespaces = [];
-    var xmlNamespace = {};
+    let xmlNamespace = {};
     xmlNamespace.xml = NamespaceSupport.XMLNS;
     this.namespaces.push(xmlNamespace);
 };

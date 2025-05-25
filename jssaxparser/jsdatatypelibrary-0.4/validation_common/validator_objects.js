@@ -89,8 +89,8 @@ function Context(uri, map) {
     this.map = map;
 }
 Context.prototype.toHTML = function() {
-    var string = "<table><tr><th>Context</th></tr><tr><td>uri</td><td>" + this.uri + "</td></tr><tr><td><table><tr><th>map</th></tr>";
-    for (var i in this.map) {
+    let string = "<table><tr><th>Context</th></tr><tr><td>uri</td><td>" + this.uri + "</td></tr><tr><td><table><tr><th>map</th></tr>";
+    for (let i in this.map) {
         string += "<tr><td>" + i + "</td><td>" + this.map[i] + "</td></tr>";
     }
     return string + "</table></td></tr></table>";
@@ -213,7 +213,7 @@ function NotAllowed(message, pattern, childNode, priority) {
     this.priority = priority;
 }
 NotAllowed.prototype.toHTML = function() {
-    var string = "<table><tr><th>NotAllowed</th></tr><tr><td>message</td><td>" + this.message + "</td></tr><tr><td>pattern</td><td>" + this.pattern.toHTML() + "</td></tr><tr><td>childNode</td><td>";
+    let string = "<table><tr><th>NotAllowed</th></tr><tr><td>message</td><td>" + this.message + "</td></tr><tr><td>pattern</td><td>" + this.pattern.toHTML() + "</td></tr><tr><td>childNode</td><td>";
     //childNode may be a string directly
     if (this.childNode.toHTML) {
         string += this.childNode.toHTML();
@@ -235,7 +235,7 @@ function MissingContent(message, pattern, childNode, priority) {
 MissingContent.prototype = new NotAllowed();
 MissingContent.constructor = NotAllowed;
 MissingContent.prototype.toHTML = function() {
-    var string = "<table><tr><th>MissingContent</th></tr><tr><td>message</td><td>" + this.message + "</td></tr><tr><td>pattern</td><td>" + this.pattern.toHTML() + "</td></tr><tr><td>childNode</td><td>";
+    let string = "<table><tr><th>MissingContent</th></tr><tr><td>message</td><td>" + this.message + "</td></tr><tr><td>pattern</td><td>" + this.pattern.toHTML() + "</td></tr><tr><td>childNode</td><td>";
     //childNode may be a string directly
     if (this.childNode.toHTML) {
         string += this.childNode.toHTML();
@@ -314,8 +314,8 @@ function Data(datatype, paramList) {
     this.paramList = paramList;
 }
 Data.prototype.toHTML = function() {
-    var string = "<table><tr><th>Data</th></tr><tr><td>datatype</td><td>" + this.datatype.toHTML() + "</td></tr><tr><td><table><tr><th>paramList</th></tr>"
-    var i = this.paramList.length;
+    let string = "<table><tr><th>Data</th></tr><tr><td>datatype</td><td>" + this.datatype.toHTML() + "</td></tr><tr><td><table><tr><th>paramList</th></tr>"
+    let i = this.paramList.length;
     while (i--) {
         string += "<tr><td>" + this.paramList[i].toHTML() + "</td></tr>";
     }
@@ -331,8 +331,8 @@ function DataExcept(datatype, paramList, pattern) {
     this.pattern = pattern;
 }
 DataExcept.prototype.toHTML = function() {
-    var string = "<table><tr><th>DataExcept</th></tr><tr><td>datatype</td><td>" + this.datatype.toHTML() + "</td></tr><tr><td><table><tr><th>paramList</th></tr>"
-    var i = this.paramList.length;
+    let string = "<table><tr><th>DataExcept</th></tr><tr><td>datatype</td><td>" + this.datatype.toHTML() + "</td></tr><tr><td><table><tr><th>paramList</th></tr>"
+    let i = this.paramList.length;
     while (i--) {
         string += "<tr><td>" + this.paramList[i].toHTML() + "</td></tr>";
     }
@@ -363,7 +363,7 @@ function Attribute(nameClass, pattern, defaultValue) {
     this.defaultValue = defaultValue;
 }
 Attribute.prototype.toHTML = function() {
-    var string = "<table><tr><th>Attribute</th></tr><tr><td>nameClass</td><td>" + this.nameClass.toHTML() + "</td></tr><tr><td>pattern</td><td>" + this.pattern.toHTML() + "</td></tr></table>";
+    let string = "<table><tr><th>Attribute</th></tr><tr><td>nameClass</td><td>" + this.nameClass.toHTML() + "</td></tr><tr><td>pattern</td><td>" + this.pattern.toHTML() + "</td></tr></table>";
     if (this.defaultValue) {
         string += "</td></tr><tr><td>defaultValue</td><td>" + this.defaultValue.toHTML();
     }
@@ -426,7 +426,7 @@ used for augmenting the XML instance, by default does not do anything
 ElementNode.prototype.addAttribute = function(pattern) {};
 
 ElementNode.prototype.toHTML = function() {
-    var string = "<table><tr><th>ElementNode</th></tr><tr><td>qName</td><td>" + this.qName.toHTML() + "</td></tr><tr><td>context</td><td>" + this.context.toHTML() + "</td></tr><tr><td>attributeNodes</td><td><table>";
+    let string = "<table><tr><th>ElementNode</th></tr><tr><td>qName</td><td>" + this.qName.toHTML() + "</td></tr><tr><td>context</td><td>" + this.context.toHTML() + "</td></tr><tr><td>attributeNodes</td><td><table>";
     for (var i in this.attributeNodes) {
         string += "<tr><td>" + this.attributeNodes[i].toHTML() + "</td></tr>";
     }

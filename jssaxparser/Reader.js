@@ -63,7 +63,7 @@ StringReader.prototype.read = function (cbuf, off, len) { // (char[] (, int, int
         if (this.nextIdx >= this.length) {
              throw new EndOfInputException();
         }
-        var ch = this.s.charAt(this.nextIdx);
+        let ch = this.s.charAt(this.nextIdx);
         this.nextIdx++;
         return ch;
     }

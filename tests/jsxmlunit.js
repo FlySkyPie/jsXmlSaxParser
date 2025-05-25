@@ -2,8 +2,8 @@
 
 /* comes from https://developer.mozilla.org/En/Code_snippets/LookupNamespaceURI */
 function lookupNamespaceURI (node, prefix) { // adapted directly from http://www.w3.org/TR/DOM-Level-3-Core/namespaces-algorithms.html#lookupNamespaceURIAlgo
-	var htmlMode = document.contentType; 
-    var xmlnsPattern = /^xmlns:(.*)$/;
+	let htmlMode = document.contentType; 
+    let xmlnsPattern = /^xmlns:(.*)$/;
     if (node.lookupNamespaceURI && htmlMode !== 'text/html') {
         return node.lookupNamespaceURI(prefix);
     }
@@ -14,8 +14,8 @@ function lookupNamespaceURI (node, prefix) { // adapted directly from http://www
                 return node.namespaceURI;
             }
             if (node.attributes.length) {
-                for (var i=0; i < node.attributes.length; i++) {
-                    var att = node.attributes[i];
+                for (let i=0; i < node.attributes.length; i++) {
+                    let att = node.attributes[i];
                     xmlnsPattern.lastIndex = 0; 
                     if (att.name.search(xmlnsPattern) !== -1 && xmlnsPattern.exec(att.name)[1] === prefix) {
                         if (att.value) {
@@ -64,12 +64,12 @@ function lookupNamespaceURI (node, prefix) { // adapted directly from http://www
 }
 
 function assertAttributesEquals(attsExpected, attsResult) {
-    var i, j;
+    let i, j;
     for (i = 0 ; i < attsExpected.length ; i++) {
-        var attExpected = attsExpected.item(i);
-        var attFound = false;
+        let attExpected = attsExpected.item(i);
+        let attFound = false;
         for (j = 0 ; j < attsResult.length && !attFound; j++) {
-            var attResult = attsResult.item(j);
+            let attResult = attsResult.item(j);
             if (attExpected.nodeName === attResult.nodeName && lookupNamespaceURI(attExpected, attExpected.prefix) === lookupNamespaceURI(attResult, attResult.prefix)) {
                 attFound = true;
                 assertXmlEquals(attExpected, attResult);
@@ -80,7 +80,7 @@ function assertAttributesEquals(attsExpected, attsResult) {
 }
 
 function assertXmlEquals(expected, result) {
-    var i;
+    let i;
     assertEquals("different nodes types", expected.nodeType, result.nodeType);
     switch(expected.nodeType) {
         case 1: //element nodes
@@ -89,14 +89,14 @@ function assertXmlEquals(expected, result) {
             var attsResult = result.attributes;
             //remove namespaces declaration from attributes, not supported
             for (i = 0 ; i < attsExpected.length ; i++) {
-                var attExpected = attsExpected.item(i);
+                let attExpected = attsExpected.item(i);
                 if (/^xmlns/.test(attExpected.nodeName)) {
                     expected.removeAttributeNode(attExpected);
                     i--;
                 }
             }
             for (i = 0 ; i < attsResult.length ; i++) {
-                var attResult = attsResult.item(i);
+                let attResult = attsResult.item(i);
                 if (/^xmlns/.test(attResult.nodeName)) {
                     result.removeAttributeNode(attResult);
                     i--;
@@ -108,14 +108,14 @@ function assertXmlEquals(expected, result) {
             var childNodesResult = result.childNodes;
             //remove ignorables child nodes
             for (i = 0 ; i < childNodesExpected.length ; i++) {
-                var childNodeExpected = childNodesExpected.item(i);
+                let childNodeExpected = childNodesExpected.item(i);
                 if (is_ignorable(childNodeExpected)) {
                     expected.removeChild(childNodeExpected);
                     i--;
                 }
             }
             for (i = 0 ; i < childNodesResult.length ; i++) {
-                var childNodeResult = childNodesResult.item(i);
+                let childNodeResult = childNodesResult.item(i);
                 if (is_ignorable(childNodeResult)) {
                     result.removeChild(childNodeResult);
                     i--;

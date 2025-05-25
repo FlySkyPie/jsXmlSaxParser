@@ -46,8 +46,8 @@ Parameters:
 */
 function LocatorImpl (locator) {
     if (locator) {
-        var properties = ['columnNumber', 'lineNumber', 'publicId', 'systemId'];
-        for (var i=0; i < properties.length; i++) {
+        let properties = ['columnNumber', 'lineNumber', 'publicId', 'systemId'];
+        for (let i=0; i < properties.length; i++) {
             this[properties[i]] = locator[properties[i]];
         }
     }
@@ -111,8 +111,8 @@ Parameters:
 function Locator2Impl (locator) {
     if (locator) {
         LocatorImpl.call(this, locator); // 'columnNumber', 'lineNumber', 'publicId', 'systemId'
-        var properties = ['encoding', 'version'];
-        for (var i=0; i < properties.length; i++) {
+        let properties = ['encoding', 'version'];
+        for (let i=0; i < properties.length; i++) {
             this[properties[i]] = locator[properties[i]];
         }
     }

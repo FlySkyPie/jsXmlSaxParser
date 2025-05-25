@@ -94,7 +94,7 @@ function node_after( sib )
  */
 function last_child( par )
 {
-  var res=par.lastChild;
+  let res=par.lastChild;
   while (res) {
     if (!is_ignorable(res)) {return res;}
     res = res.previousSibling;
@@ -114,7 +114,7 @@ function last_child( par )
  */
 function first_child( par )
 {
-  var res=par.firstChild;
+  let res=par.firstChild;
   while (res) {
     if (!is_ignorable(res)) {return res;}
     res = res.nextSibling;
@@ -133,7 +133,7 @@ function first_child( par )
  */
 function data_of( txt )
 {
-  var data = txt.data;
+  let data = txt.data;
   // Use ECMA-262 Edition 3 String and RegExp features
   data = data.replace(/[\t\n\r ]+/g, " ");
   if (data.charAt(0) === " ") {

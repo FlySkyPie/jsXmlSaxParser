@@ -10,7 +10,7 @@
  */
 
 function escape(s) {
-    var n = s;
+    let n = s;
     n = n.replace(/&/g, "&amp;");
     n = n.replace(/</g, "&lt;");
     n = n.replace(/>/g, "&gt;");
@@ -20,9 +20,9 @@ function escape(s) {
 }
 
 function diff( o, n ) {
-  var ns = {};
-  var os = {};
-  var i;
+  let ns = {};
+  let os = {};
+  let i;
 
   for ( i = 0; i < n.length; i++ ) {
     if ( ns[ n[i] ] == null ) {
@@ -68,22 +68,22 @@ function diffString( o, n ) {
   o = o.replace(/\s+$/, '');
   n = n.replace(/\s+$/, '');
 
-  var out = diff(o == "" ? [] : o.split(/\s+/), n == "" ? [] : n.split(/\s+/) );
-  var str = "";
+  let out = diff(o == "" ? [] : o.split(/\s+/), n == "" ? [] : n.split(/\s+/) );
+  let str = "";
 
-  var oSpace = o.match(/\s+/g);
+  let oSpace = o.match(/\s+/g);
   if (oSpace == null) {
     oSpace = ["\n"];
   } else {
     oSpace.push("\n");
   }
-  var nSpace = n.match(/\s+/g);
+  let nSpace = n.match(/\s+/g);
   if (nSpace == null) {
     nSpace = ["\n"];
   } else {
     nSpace.push("\n");
   }
-  var i;
+  let i;
   if (out.n.length === 0) {
       for (i = 0; i < out.o.length; i++) {
         str += '<del>' + escape(out.o[i]) + oSpace[i] + "</del>";
@@ -99,7 +99,7 @@ function diffString( o, n ) {
       if (out.n[i].text == null) {
         str += '<ins>' + escape(out.n[i]) + nSpace[i] + "</ins>";
       } else {
-        var pre = "";
+        let pre = "";
 
         for (n = out.n[i].row + 1; n < out.o.length && out.o[n].text == null; n++ ) {
           pre += '<del>' + escape(out.o[n]) + oSpace[n] + "</del>";
@@ -121,24 +121,24 @@ function diffString2( o, n ) {
   o = o.replace(/\s+$/, '');
   n = n.replace(/\s+$/, '');
 
-  var out = diff(o == "" ? [] : o.split(/\s+/), n == "" ? [] : n.split(/\s+/) );
+  let out = diff(o == "" ? [] : o.split(/\s+/), n == "" ? [] : n.split(/\s+/) );
 
-  var oSpace = o.match(/\s+/g);
+  let oSpace = o.match(/\s+/g);
   if (oSpace == null) {
     oSpace = ["\n"];
   } else {
     oSpace.push("\n");
   }
-  var nSpace = n.match(/\s+/g);
+  let nSpace = n.match(/\s+/g);
   if (nSpace == null) {
     nSpace = ["\n"];
   } else {
     nSpace.push("\n");
   }
 
-  var os = "";
-  var colors = [];
-  var i;
+  let os = "";
+  let colors = [];
+  let i;
   for (i = 0; i < out.o.length; i++) {
       colors[i] = randomColor();
 
@@ -150,7 +150,7 @@ function diffString2( o, n ) {
       }
   }
 
-  var ns = "";
+  let ns = "";
   for (i = 0; i < out.n.length; i++) {
       if (out.n[i].text != null) {
           ns += '<span style="background-color: ' +colors[out.n[i].row]+ '">' + 

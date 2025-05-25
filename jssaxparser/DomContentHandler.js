@@ -37,7 +37,7 @@
 /* Private static helper function */
 function _createDocument() {
     // code for IE
-    var doc;
+    let doc;
     if (window.ActiveXObject) {
         doc = new ActiveXObject("Microsoft.XMLDOM");
         doc.async = "false";
@@ -58,21 +58,21 @@ function _appendToCurrentElement (node) {
     }
 }
 function _addAtts(atts) {
-    for (var i = 0 ; i < atts.getLength() ; i++) {
-        var namespaceURI = atts.getURI(i);
-        var value = atts.getValue(i);
+    for (let i = 0 ; i < atts.getLength() ; i++) {
+        let namespaceURI = atts.getURI(i);
+        let value = atts.getValue(i);
         if (namespaceURI === '' || namespaceURI === null) { // namespaceURI should be null, not empty string, no?
-            var localName = atts.getLocalName(i);
+            let localName = atts.getLocalName(i);
             this.currentElement.setAttribute(localName, value);
         } else {
-            var qName = atts.getQName(i);
+            let qName = atts.getQName(i);
             this.currentElement.setAttributeNS(namespaceURI, qName, value);
         }
     }
 }
 function _addNsDecls () { // Will add namespaces (for true XHTML) where they are declared (even if not used at that point)
     if (this.currentElement.setAttributeNodeNS) {
-        for (var prefix in this.currentAttNodes) {
+        for (let prefix in this.currentAttNodes) {
             this.currentElement.setAttributeNodeNS(this.currentAttNodes[prefix]);
         }
         this.currentAttNodes = {};
@@ -80,14 +80,14 @@ function _addNsDecls () { // Will add namespaces (for true XHTML) where they are
 }
 function _setBaseUri(atts) {
     this.currentElement.custBaseURI = this.currentElement.parentNode.custBaseURI;
-    for (var i = 0 ; i < atts.getLength() ; i++) {
-        var namespaceURI = atts.getURI(i);
+    for (let i = 0 ; i < atts.getLength() ; i++) {
+        let namespaceURI = atts.getURI(i);
         if (namespaceURI === "http://www.w3.org/XML/1998/namespace") {
-            var localName = atts.getLocalName(i);
+            let localName = atts.getLocalName(i);
             if (localName === "base") {
-                var xmlBase = atts.getValue(i);
+                let xmlBase = atts.getValue(i);
                 //remove eventual file name at the end of URI and append xmlBase
-                var idx = this.currentElement.custBaseURI.lastIndexOf('/');
+                let idx = this.currentElement.custBaseURI.lastIndexOf('/');
                 this.currentElement.custBaseURI = this.currentElement.custBaseURI.substring(0, idx + 1) + xmlBase;
             }
         }
@@ -118,7 +118,7 @@ DomContentHandler.prototype.startDocument = function() {
     }
 };
 DomContentHandler.prototype.startElement = function(namespaceURI, localName, qName, atts) {
-    var element;
+    let element;
     if (namespaceURI === '' || namespaceURI === null) { // namespaceURI should be null, not empty string, no?
         element = this.document.createElement(localName);
     } else {
@@ -138,8 +138,8 @@ DomContentHandler.prototype.startPrefixMapping = function(prefix, uri) {
     if (this.document.createAttributeNS) {
         // We need to store the declaration for later addition to the element, since the
         //   element is not yet available
-        var qName = prefix ? "xmlns:" + prefix : "xmlns";
-        var att = this.document.createAttributeNS("http://www.w3.org/2000/xmlns/", qName);
+        let qName = prefix ? "xmlns:" + prefix : "xmlns";
+        let att = this.document.createAttributeNS("http://www.w3.org/2000/xmlns/", qName);
         att.nodeValue = uri;
         if (!prefix) {
             prefix = ':'; // Put some unique value as our key which a prefix cannot use
@@ -150,17 +150,17 @@ DomContentHandler.prototype.startPrefixMapping = function(prefix, uri) {
 DomContentHandler.prototype.endPrefixMapping = function(prefix) {
 };
 DomContentHandler.prototype.processingInstruction = function(target, data) {
-    var procInst = this.document.createProcessingInstruction(target, data);
+    let procInst = this.document.createProcessingInstruction(target, data);
     _appendToCurrentElement.call(this, procInst);
 };
 DomContentHandler.prototype.ignorableWhitespace = function(ch, start, length) {
 };
 DomContentHandler.prototype.characters = function(ch, start, length) {
     if (this.cdata) {
-        var cdataNode = this.document.createCDATASection(ch);
+        let cdataNode = this.document.createCDATASection(ch);
         this.currentElement.appendChild(cdataNode);
     } else {
-        var textNode = this.document.createTextNode(ch);
+        let textNode = this.document.createTextNode(ch);
         this.currentElement.appendChild(textNode);
     }
 };
@@ -187,7 +187,7 @@ DomContentHandler.prototype.internalEntityDecl = function(name, value) {};
 
 // INTERFACE: LexicalHandler: http://www.saxproject.org/apidoc/org/xml/sax/ext/LexicalHandler.html
 DomContentHandler.prototype.comment = function(ch, start, length) {
-    var commentNode = this.document.createComment(ch);
+    let commentNode = this.document.createComment(ch);
     _appendToCurrentElement.call(this, commentNode);
 };
 
@@ -206,7 +206,7 @@ DomContentHandler.prototype.startCDATA = function() {
 
 DomContentHandler.prototype.startDTD = function(name, publicId, systemId) {
     if (document.implementation && document.implementation.createDocumentType) {
-        var dt = document.implementation.createDocumentType(name, publicId, systemId);
+        let dt = document.implementation.createDocumentType(name, publicId, systemId);
         _appendToCurrentElement.call(this, dt);
     }
 };

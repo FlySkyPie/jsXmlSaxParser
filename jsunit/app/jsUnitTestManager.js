@@ -12,7 +12,7 @@ function jsUnitTestManager()
   this.containerController = this.container.frames.testContainerController;
   this.containerTestFrame  = this.container.frames.testFrame;
 
-  var mainData             = this.mainFrame.frames.mainData;
+  let mainData             = this.mainFrame.frames.mainData;
 
   // form elements on mainData frame
   this.testFileName        = mainData.document.testRunnerForm.testFileName;
@@ -33,7 +33,7 @@ function jsUnitTestManager()
   this.uiFrames                    = new Object();
   this.uiFrames.mainStatus         = this.mainFrame.frames.mainStatus;
 
-  var mainCounts                   = this.mainFrame.frames.mainCounts;
+  let mainCounts                   = this.mainFrame.frames.mainCounts;
 
   this.uiFrames.mainCountsErrors   = mainCounts.frames.mainCountsErrors;
   this.uiFrames.mainCountsFailures = mainCounts.frames.mainCountsFailures;
@@ -61,19 +61,19 @@ jsUnitTestManager.prototype.setup = function ()
   this._suiteStack   = Array();
 
 
-  var initialSuite   = new top.jsUnitTestSuite();
+  let initialSuite   = new top.jsUnitTestSuite();
   push(this._suiteStack, initialSuite);
 }
 
 jsUnitTestManager.prototype.start = function () 
 {
   this._baseURL = this.resolveUserEnteredTestFileName();
-  var firstQuery = this._baseURL.indexOf("?");
+  let firstQuery = this._baseURL.indexOf("?");
   if (firstQuery >= 0) {
        this._baseURL = this._baseURL.substring(0, firstQuery);
   }
-  var lastSlash = this._baseURL.lastIndexOf("/");
-  var lastRevSlash = this._baseURL.lastIndexOf("\\");
+  let lastSlash = this._baseURL.lastIndexOf("/");
+  let lastRevSlash = this._baseURL.lastIndexOf("\\");
   if (lastRevSlash > lastSlash) {
      lastSlash = lastRevSlash;
   }
@@ -107,9 +107,9 @@ jsUnitTestManager.prototype.doneLoadingPage = function (pageName)
 
 jsUnitTestManager.prototype._handleNewSuite = function () 
 {
-  var allegedSuite = this.containerTestFrame.suite();
+  let allegedSuite = this.containerTestFrame.suite();
   if (allegedSuite.isjsUnitTestSuite) {
-    var newSuite = allegedSuite.clone();
+    let newSuite = allegedSuite.clone();
     if (newSuite.containsTestPages())
       push(this._suiteStack, newSuite);
     this._nextPage();
@@ -172,7 +172,7 @@ jsUnitTestManager.prototype._runTest = function ()
 
 jsUnitTestManager.prototype._done = function () 
 {
-  var secondsSinceRunBegan=(new Date() - this._timeRunStarted)/1000;
+  let secondsSinceRunBegan=(new Date() - this._timeRunStarted)/1000;
   this.setStatus('Done (' + secondsSinceRunBegan + ' seconds)');
   this._cleanUp();
   if (top.shouldSubmitResults()) {
@@ -197,7 +197,7 @@ jsUnitTestManager.prototype._nextPage = function ()
 
 jsUnitTestManager.prototype._currentSuite = function () 
 {
-  var suite = null;
+  let suite = null;
 
   if (this._suiteStack && this._suiteStack.length > 0)
     suite = this._suiteStack[this._suiteStack.length-1];
@@ -209,11 +209,11 @@ jsUnitTestManager.prototype.calculateProgressBarProportion = function ()
 {
   if (this.totalCount == 0) 
     return 0;
-  var currentDivisor = 1;
-  var result         = 0;
+  let currentDivisor = 1;
+  let result         = 0;
   
-  for (var i = 0; i < this._suiteStack.length; i++) {
-    var aSuite     = this._suiteStack[i];
+  for (let i = 0; i < this._suiteStack.length; i++) {
+    let aSuite     = this._suiteStack[i];
     currentDivisor *= aSuite.testPages.length;
     result += (aSuite.pageIndex - 1)/currentDivisor;
   }
@@ -236,7 +236,7 @@ jsUnitTestManager.prototype.abort = function ()
 
 jsUnitTestManager.prototype.getTimeout = function () 
 {
-  var result = jsUnitTestManager.TESTPAGE_WAIT_SEC;
+  let result = jsUnitTestManager.TESTPAGE_WAIT_SEC;
   try {
     result = eval(this.timeout.value);
   } 
@@ -247,7 +247,7 @@ jsUnitTestManager.prototype.getTimeout = function ()
 
 jsUnitTestManager.prototype.getsetUpPageTimeout = function () 
 {
-  var result = jsUnitTestManager.SETUPPAGE_TIMEOUT;
+  let result = jsUnitTestManager.SETUPPAGE_TIMEOUT;
   try {
     result = eval(this.setUpPageTimeout.value);
   } 
@@ -258,7 +258,7 @@ jsUnitTestManager.prototype.getsetUpPageTimeout = function ()
 
 jsUnitTestManager.prototype.isTestPageSuite = function () 
 {
-  var result = false;
+  let result = false;
   if (typeof(this.containerTestFrame.suite) == 'function')
   {
     result = true;
@@ -268,9 +268,9 @@ jsUnitTestManager.prototype.isTestPageSuite = function ()
 
 jsUnitTestManager.prototype.getTestFunctionNames = function () 
 {
-  var testFrame         = this.containerTestFrame;
-  var testFunctionNames = new Array();
-  var i;
+  let testFrame         = this.containerTestFrame;
+  let testFunctionNames = new Array();
+  let i;
   
   if (testFrame && typeof(testFrame.exposeTestFunctionNames) == 'function')
         return testFrame.exposeTestFunctionNames();
@@ -278,10 +278,10 @@ jsUnitTestManager.prototype.getTestFunctionNames = function ()
   if (testFrame && 
       testFrame.document && 
       typeof(testFrame.document.scripts) != 'undefined') { // IE5 and up
-    var scriptsInTestFrame = testFrame.document.scripts;
+    let scriptsInTestFrame = testFrame.document.scripts;
     
     for (i = 0; i < scriptsInTestFrame.length; i++) {
-      var someNames = this._extractTestFunctionNamesFromScript(scriptsInTestFrame[i]);
+      let someNames = this._extractTestFunctionNamesFromScript(scriptsInTestFrame[i]);
       if (someNames)
         testFunctionNames=testFunctionNames.concat(someNames);
     }
@@ -297,14 +297,14 @@ jsUnitTestManager.prototype.getTestFunctionNames = function ()
 
 jsUnitTestManager.prototype._extractTestFunctionNamesFromScript = function (aScript) 
 {
-  var result;
-  var remainingScriptToInspect = aScript.text;
-  var currentIndex             = remainingScriptToInspect.indexOf('function test');
+  let result;
+  let remainingScriptToInspect = aScript.text;
+  let currentIndex             = remainingScriptToInspect.indexOf('function test');
   while (currentIndex != -1) {
     if (!result) 
       result=new Array();
       
-    var fragment = remainingScriptToInspect.substring(currentIndex, remainingScriptToInspect.length);
+    let fragment = remainingScriptToInspect.substring(currentIndex, remainingScriptToInspect.length);
     result       = result.concat(fragment.substring('function '.length, fragment.indexOf('(')));
                 remainingScriptToInspect=remainingScriptToInspect.substring(currentIndex+12, remainingScriptToInspect.length);
                 currentIndex=remainingScriptToInspect.indexOf('function test');
@@ -352,8 +352,8 @@ jsUnitTestManager.prototype.executeTestFunction = function (functionName)
 {
   this._testFunctionName=functionName;
   this.setStatus('Running test "' + this._testFunctionName + '"');
-  var excep=null;
-  var timeBefore = new Date();  
+  let excep=null;
+  let timeBefore = new Date();  
   try {
     this.containerTestFrame.setUp();
     eval('this.containerTestFrame.' + this._testFunctionName + '();');
@@ -369,10 +369,10 @@ jsUnitTestManager.prototype.executeTestFunction = function (functionName)
       excep = e2;
     }
   }
-  var timeTaken = (new Date() - timeBefore) / 1000;
+  let timeTaken = (new Date() - timeBefore) / 1000;
   if (excep != null)
     this._handleTestException(excep);
-  var serializedTestCaseString = this._fullyQualifiedCurrentTestFunctionName()+"|"+timeTaken+"|";
+  let serializedTestCaseString = this._fullyQualifiedCurrentTestFunctionName()+"|"+timeTaken+"|";
   if (excep==null)
   	serializedTestCaseString+="S||";
   else {
@@ -383,13 +383,13 @@ jsUnitTestManager.prototype.executeTestFunction = function (functionName)
   	}
   	serializedTestCaseString+=this._problemDetailMessageFor(excep);
   }  	
-  var newOption = new Option(serializedTestCaseString);
+  let newOption = new Option(serializedTestCaseString);
   this.testCaseResultsField[this.testCaseResultsField.length]=newOption;  
 }
 
 jsUnitTestManager.prototype._fullyQualifiedCurrentTestFunctionName = function() {
-    var testURL = this.containerTestFrame.location.href;
-    var testQuery = testURL.indexOf("?");
+    let testURL = this.containerTestFrame.location.href;
+    let testQuery = testURL.indexOf("?");
     if (testQuery >= 0) {
         testURL = testURL.substring(0, testQuery);
     }
@@ -402,8 +402,8 @@ jsUnitTestManager.prototype._fullyQualifiedCurrentTestFunctionName = function() 
 
 jsUnitTestManager.prototype._handleTestException = function (excep) 
 {
-  var problemMessage = this._fullyQualifiedCurrentTestFunctionName() + ' ';
-  var errOption;
+  let problemMessage = this._fullyQualifiedCurrentTestFunctionName() + ' ';
+  let errOption;
   if (typeof(excep.isJsUnitException) == 'undefined' || !excep.isJsUnitException) {
     problemMessage += 'had an error';
     this.errorCount++;
@@ -412,8 +412,8 @@ jsUnitTestManager.prototype._handleTestException = function (excep)
     problemMessage += 'failed';
     this.failureCount++;
   }
-  var listField = this.problemsListField;
-  var problemDocument = this.mainFrame.frames.mainErrors.document;
+  let listField = this.problemsListField;
+  let problemDocument = this.mainFrame.frames.mainErrors.document;
   if (typeof(problemDocument.createElement) != 'undefined') {
     // DOM Level 2 HTML method.
     // this is required for Opera 7 since appending to the end of the 
@@ -444,7 +444,7 @@ jsUnitTestManager.prototype._handleTestException = function (excep)
 
 jsUnitTestManager.prototype._problemDetailMessageFor = function (excep) 
 {
-  var result=null;
+  let result=null;
   if (typeof(excep.isJsUnitException) != 'undefined' && excep.isJsUnitException) {
     result = '';
     if (excep.comment != null)
@@ -470,7 +470,7 @@ jsUnitTestManager.prototype._problemDetailMessageFor = function (excep)
 
 jsUnitTestManager.prototype._setTextOnLayer = function (layerName, str)
 {
-  var html = '';
+  let html = '';
   html += '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">';
   html += '<html><head><link rel="stylesheet" type="text/css" href="css/jsUnitStyle.css"><\/head>';
   html += '<body><div>';
@@ -526,7 +526,7 @@ jsUnitTestManager.prototype.updateProgressIndicators = function ()
 
 jsUnitTestManager.prototype.showMessageForSelectedProblemTest = function ()
 {
-  var problemTestIndex = this.problemsListField.selectedIndex;
+  let problemTestIndex = this.problemsListField.selectedIndex;
   if (problemTestIndex != -1)
     alert(this.problemsListField[problemTestIndex].value);
 }
@@ -546,11 +546,11 @@ jsUnitTestManager.prototype.showMessagesForAllProblemTests = function ()
    }
 
    this._windowForAllProblemMessages = window.open('','','width=600, height=350,status=no,resizable=yes,scrollbars=yes');
-   var resDoc = this._windowForAllProblemMessages.document;
+   let resDoc = this._windowForAllProblemMessages.document;
    resDoc.write('<html><head><link rel="stylesheet" href="../css/jsUnitStyle.css"><title>Tests with problems - JsUnit<\/title><head><body>');
    resDoc.write('<p class="jsUnitSubHeading">Tests with problems (' + this.problemsListField.length + ' total) - JsUnit<\/p>');
    resDoc.write('<p class="jsUnitSubSubHeading"><i>Running on '+navigator.userAgent+'</i></p>');
-   for (var i = 0; i < this.problemsListField.length; i++)
+   for (let i = 0; i < this.problemsListField.length; i++)
    {
      resDoc.write('<p class="jsUnitDefault">');
      resDoc.write('<b>' + (i + 1) + '. ');
@@ -566,10 +566,10 @@ jsUnitTestManager.prototype.showMessagesForAllProblemTests = function ()
 
 jsUnitTestManager.prototype._clearProblemsList = function ()
 {
-  var listField = this.problemsListField;
-  var initialLength=listField.options.length;
+  let listField = this.problemsListField;
+  let initialLength=listField.options.length;
 
-  for (var i = 0; i < initialLength; i++)
+  for (let i = 0; i < initialLength; i++)
     listField.remove(0);
 }
 
@@ -594,8 +594,8 @@ jsUnitTestManager.prototype._setRunButtonEnabled = function (b)
 
 jsUnitTestManager.prototype.getTestFileName = function () 
 {
-  var rawEnteredFileName = this.testFileName.value;
-  var result             = rawEnteredFileName;
+  let rawEnteredFileName = this.testFileName.value;
+  let result             = rawEnteredFileName;
 
   while (result.indexOf('\\') != -1)
     result = result.replace('\\', '/');
@@ -605,7 +605,7 @@ jsUnitTestManager.prototype.getTestFileName = function ()
 
 jsUnitTestManager.prototype.resolveUserEnteredTestFileName = function (rawText) 
 {
-  var userEnteredTestFileName = top.testManager.getTestFileName();
+  let userEnteredTestFileName = top.testManager.getTestFileName();
   
   // only test for file:// since Opera uses a different format
   if (userEnteredTestFileName.indexOf('http://') == 0 || userEnteredTestFileName.indexOf('https://') == 0 || userEnteredTestFileName.indexOf('file://') == 0)
@@ -621,7 +621,7 @@ function getTestFileProtocol()
 
 function getDocumentProtocol() 
 {
-  var protocol = top.document.location.protocol;
+  let protocol = top.document.location.protocol;
     
   if (protocol == "file:") 
     return "file:///";
@@ -644,8 +644,8 @@ function isBeingRunOverHTTP() {
 
 function getWebserver() {
 	if (isBeingRunOverHTTP()) {
-		var myUrl = location.href;
-		var myUrlWithProtocolStripped = myUrl.substring(myUrl.indexOf("/") + 2);
+		let myUrl = location.href;
+		let myUrlWithProtocolStripped = myUrl.substring(myUrl.indexOf("/") + 2);
 		return myUrlWithProtocolStripped.substring(0, myUrlWithProtocolStripped.indexOf("/"));
 	}
 	return null;
