@@ -31,10 +31,161 @@
           Report the beginning of some internal and external XML entities.
 */
 
-// Begin namespace
-(function () {
+// CLASS (could be renamed or aliased to DefaultHandler2): http://www.saxproject.org/apidoc/org/xml/sax/ext/DefaultHandler2.html
+export class DomContentHandler {
+    constructor() {
+        this.saxParseExceptions = [];
+        this.currentAttNodes = {};
+        //if text coming is inside a cdata section then this boolean will be set to true
+        this.cdata = false;
+    }
+
+    toString() {
+        return "DomContentHandler";
+    }
+
+    // INTERFACE: ContentHandler: http://www.saxproject.org/apidoc/org/xml/sax/ContentHandler.html
+    // implemented in DefaultHandler, DefaultHandler2:
+    //  http://www.saxproject.org/apidoc/org/xml/sax/helpers/DefaultHandler.html and
+    //  http://www.saxproject.org/apidoc/org/xml/sax/ext/DefaultHandler2.html
+    startDocument() {
+        this.document = this._createDocument();
+        if (this.locator) {
+            //baseURI is read only (and not supported on IE)
+            this.document.custBaseURI = this.locator.getSystemId();
+        }
+    }
+
+    startElement(namespaceURI, localName, qName, atts) {
+        let element;
+        if (namespaceURI === '' || namespaceURI === null) { // namespaceURI should be null, not empty string, no?
+            element = this.document.createElement(localName);
+        } else {
+            element = this.document.createElementNS(namespaceURI, qName);
+        }
+        this._appendToCurrentElement.call(this, element);
+        this.currentElement = element;
+        this._addAtts.call(this, atts);
+        this._addNsDecls.call(this);
+        this._setBaseUri.call(this, atts);
+    }
+
+    endElement(namespaceURI, localName, qName) {
+        this.currentElement = this.currentElement.parentNode;
+    }
+
+    startPrefixMapping(prefix, uri) {
+        /* not supported by all browsers*/
+        if (this.document.createAttributeNS) {
+            // We need to store the declaration for later addition to the element, since the
+            //   element is not yet available
+            let qName = prefix ? "xmlns:" + prefix : "xmlns";
+            let att = this.document.createAttributeNS("http://www.w3.org/2000/xmlns/", qName);
+            att.nodeValue = uri;
+            if (!prefix) {
+                prefix = ':'; // Put some unique value as our key which a prefix cannot use
+            }
+            this.currentAttNodes[prefix] = att;
+        }
+    }
+
+    endPrefixMapping(prefix) {
+    }
+
+    processingInstruction(target, data) {
+        let procInst = this.document.createProcessingInstruction(target, data);
+        this._appendToCurrentElement.call(this, procInst);
+    }
+
+    ignorableWhitespace(ch, start, length) {
+    }
+
+    characters(ch, start, length) {
+        if (this.cdata) {
+            let cdataNode = this.document.createCDATASection(ch);
+            this.currentElement.appendChild(cdataNode);
+        } else {
+            let textNode = this.document.createTextNode(ch);
+            this.currentElement.appendChild(textNode);
+        }
+    }
+
+    skippedEntity(name) {
+    }
+
+    endDocument() {
+    }
+
+    setDocumentLocator(locator) {
+        this.locator = locator;
+    }
+
+    // INTERFACE: DeclHandler: http://www.saxproject.org/apidoc/org/xml/sax/ext/DeclHandler.html
+
+    attributeDecl(eName, aName, type, mode, value) { }
+
+    elementDecl(name, model) { }
+    externalEntityDecl(name, publicId, systemId) { }
+    internalEntityDecl(name, value) { }
+
+    // INTERFACE: LexicalHandler: http://www.saxproject.org/apidoc/org/xml/sax/ext/LexicalHandler.html
+    comment(ch, start, length) {
+        let commentNode = this.document.createComment(ch);
+        this._appendToCurrentElement.call(this, commentNode);
+    }
+
+    endCDATA() {
+        //used in characters() methods
+        this.cdata = false;
+    }
+
+    endDTD() { }
+    endEntity(name) { }
+
+    startCDATA() {
+        //used in characters() methods
+        this.cdata = true;
+    }
+
+    startDTD(name, publicId, systemId) {
+        if (document.implementation && document.implementation.createDocumentType) {
+            let dt = document.implementation.createDocumentType(name, publicId, systemId);
+            this._appendToCurrentElement.call(this, dt);
+        }
+    }
+
+    startEntity(name) { }
+
+    // INTERFACE: EntityResolver: http://www.saxproject.org/apidoc/org/xml/sax/EntityResolver.html
+    // Could implement this by checking for last two arguments missing in EntityResolver2 resolveEntity() below
+    // DomContentHandler.prototype.resolveEntity(publicId, systemId) {};
+
+    // INTERFACE: EntityResolver2: http://www.saxproject.org/apidoc/org/xml/sax/ext/EntityResolver2.html
+    resolveEntity(name, publicId, baseURI, systemId) { }
+
+    getExternalSubset(name, baseURI) { }
+
+    // INTERFACE: DTDHandler: http://www.saxproject.org/apidoc/org/xml/sax/DTDHandler.html
+    notationDecl(name, publicId, systemId) { }
+
+    unparsedEntityDecl(name, publicId, systemId, notationName) { }
+
+    // INTERFACE: ErrorHandler: http://www.saxproject.org/apidoc/org/xml/sax/ErrorHandler.html
+    warning(saxParseException) {
+        this.saxParseExceptions.push(saxParseException);
+    }
+
+    error(saxParseException) {
+        this.saxParseExceptions.push(saxParseException);
+    }
+
+    fatalError(saxParseException) {
+        throw saxParseException;
+    }
+
+
     /* Private static helper function */
-    function _createDocument() {
+    _createDocument() {
         // code for IE
         let doc;
         if (window.ActiveXObject) {
@@ -49,15 +200,15 @@
     }
 
     /* Private static helpers treated below as private instance methods, so don't need to add these to the public API; we might use a Relator to also get rid of non-standard public properties */
-    function _appendToCurrentElement (node) {
+    _appendToCurrentElement(node) {
         if (!this.currentElement) {
             this.document.appendChild(node);
         } else {
             this.currentElement.appendChild(node);
         }
     }
-    function _addAtts(atts) {
-        for (let i = 0 ; i < atts.getLength() ; i++) {
+    _addAtts(atts) {
+        for (let i = 0; i < atts.getLength(); i++) {
             let namespaceURI = atts.getURI(i);
             let value = atts.getValue(i);
             if (namespaceURI === '' || namespaceURI === null) { // namespaceURI should be null, not empty string, no?
@@ -69,7 +220,7 @@
             }
         }
     }
-    function _addNsDecls () { // Will add namespaces (for true XHTML) where they are declared (even if not used at that point)
+    _addNsDecls() { // Will add namespaces (for true XHTML) where they are declared (even if not used at that point)
         if (this.currentElement.setAttributeNodeNS) {
             for (let prefix in this.currentAttNodes) {
                 this.currentElement.setAttributeNodeNS(this.currentAttNodes[prefix]);
@@ -77,9 +228,9 @@
             this.currentAttNodes = {};
         }
     }
-    function _setBaseUri(atts) {
+    _setBaseUri(atts) {
         this.currentElement.custBaseURI = this.currentElement.parentNode.custBaseURI;
-        for (let i = 0 ; i < atts.getLength() ; i++) {
+        for (let i = 0; i < atts.getLength(); i++) {
             let namespaceURI = atts.getURI(i);
             if (namespaceURI === "http://www.w3.org/XML/1998/namespace") {
                 let localName = atts.getLocalName(i);
@@ -93,159 +244,5 @@
         }
     }
 
-    // CLASS (could be renamed or aliased to DefaultHandler2): http://www.saxproject.org/apidoc/org/xml/sax/ext/DefaultHandler2.html
-    class DomContentHandler {
-        constructor() {
-            this.saxParseExceptions = [];
-            this.currentAttNodes = {};
-            //if text coming is inside a cdata section then this boolean will be set to true
-            this.cdata = false;
-        }
+}
 
-        toString() {
-            return "DomContentHandler";
-        }
-
-        // INTERFACE: ContentHandler: http://www.saxproject.org/apidoc/org/xml/sax/ContentHandler.html
-        // implemented in DefaultHandler, DefaultHandler2:
-        //  http://www.saxproject.org/apidoc/org/xml/sax/helpers/DefaultHandler.html and
-        //  http://www.saxproject.org/apidoc/org/xml/sax/ext/DefaultHandler2.html
-        startDocument() {
-            this.document = _createDocument();
-            if (this.locator) {
-                //baseURI is read only (and not supported on IE)
-                this.document.custBaseURI = this.locator.getSystemId();
-            }
-        }
-
-        startElement(namespaceURI, localName, qName, atts) {
-            let element;
-            if (namespaceURI === '' || namespaceURI === null) { // namespaceURI should be null, not empty string, no?
-                element = this.document.createElement(localName);
-            } else {
-                element = this.document.createElementNS(namespaceURI, qName);
-            }
-            _appendToCurrentElement.call(this, element);
-            this.currentElement = element;
-            _addAtts.call(this, atts);
-            _addNsDecls.call(this);
-            _setBaseUri.call(this, atts);
-        }
-
-        endElement(namespaceURI, localName, qName) {
-            this.currentElement = this.currentElement.parentNode;
-        }
-
-        startPrefixMapping(prefix, uri) {
-            /* not supported by all browsers*/
-            if (this.document.createAttributeNS) {
-                // We need to store the declaration for later addition to the element, since the
-                //   element is not yet available
-                let qName = prefix ? "xmlns:" + prefix : "xmlns";
-                let att = this.document.createAttributeNS("http://www.w3.org/2000/xmlns/", qName);
-                att.nodeValue = uri;
-                if (!prefix) {
-                    prefix = ':'; // Put some unique value as our key which a prefix cannot use
-                }
-                this.currentAttNodes[prefix] = att;
-            }
-        }
-
-        endPrefixMapping(prefix) {
-        }
-
-        processingInstruction(target, data) {
-            let procInst = this.document.createProcessingInstruction(target, data);
-            _appendToCurrentElement.call(this, procInst);
-        }
-
-        ignorableWhitespace(ch, start, length) {
-        }
-
-        characters(ch, start, length) {
-            if (this.cdata) {
-                let cdataNode = this.document.createCDATASection(ch);
-                this.currentElement.appendChild(cdataNode);
-            } else {
-                let textNode = this.document.createTextNode(ch);
-                this.currentElement.appendChild(textNode);
-            }
-        }
-
-        skippedEntity(name) {
-        }
-
-        endDocument() {
-        }
-
-        setDocumentLocator(locator) {
-            this.locator = locator;
-        }
-
-        // INTERFACE: DeclHandler: http://www.saxproject.org/apidoc/org/xml/sax/ext/DeclHandler.html
-
-        attributeDecl(eName, aName, type, mode, value) {}
-
-        elementDecl(name, model) {}
-        externalEntityDecl(name, publicId, systemId) {}
-        internalEntityDecl(name, value) {}
-
-        // INTERFACE: LexicalHandler: http://www.saxproject.org/apidoc/org/xml/sax/ext/LexicalHandler.html
-        comment(ch, start, length) {
-            let commentNode = this.document.createComment(ch);
-            _appendToCurrentElement.call(this, commentNode);
-        }
-
-        endCDATA() {
-            //used in characters() methods
-            this.cdata = false;
-        }
-
-        endDTD() {}
-        endEntity(name) {}
-
-        startCDATA() {
-            //used in characters() methods
-            this.cdata = true;
-        }
-
-        startDTD(name, publicId, systemId) {
-            if (document.implementation && document.implementation.createDocumentType) {
-                let dt = document.implementation.createDocumentType(name, publicId, systemId);
-                _appendToCurrentElement.call(this, dt);
-            }
-        }
-
-        startEntity(name) {}
-
-        // INTERFACE: EntityResolver: http://www.saxproject.org/apidoc/org/xml/sax/EntityResolver.html
-        // Could implement this by checking for last two arguments missing in EntityResolver2 resolveEntity() below
-        // DomContentHandler.prototype.resolveEntity(publicId, systemId) {};
-
-        // INTERFACE: EntityResolver2: http://www.saxproject.org/apidoc/org/xml/sax/ext/EntityResolver2.html
-        resolveEntity(name, publicId, baseURI, systemId) {}
-
-        getExternalSubset(name, baseURI) {}
-
-        // INTERFACE: DTDHandler: http://www.saxproject.org/apidoc/org/xml/sax/DTDHandler.html
-        notationDecl(name, publicId, systemId) {}
-
-        unparsedEntityDecl(name, publicId, systemId, notationName) {}
-
-        // INTERFACE: ErrorHandler: http://www.saxproject.org/apidoc/org/xml/sax/ErrorHandler.html
-        warning(saxParseException) {
-            this.saxParseExceptions.push(saxParseException);
-        }
-
-        error(saxParseException) {
-            this.saxParseExceptions.push(saxParseException);
-        }
-
-        fatalError(saxParseException) {
-            throw saxParseException;
-        }
-    }
-
-    // EXPORT
-    this.DomContentHandler = DomContentHandler;
-}());
