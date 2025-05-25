@@ -48,7 +48,7 @@ data Pattern = Empty
                | Attribute NameClass Pattern
                | Element NameClass Pattern
                | After Pattern Pattern
-		
+    	
 The After pattern is used internally and will be explained later.
 
 Note that there is an Element pattern rather than a Ref pattern. In the simplified XML representation of patterns, every ref element refers to an element pattern. In the internal representation of patterns, we can replace each reference to a ref pattern by a reference to the element pattern that the ref pattern references, resulting in a cyclic data structure. (Note that even though Haskell is purely functional it can handle cyclic data structures because of its laziness.)
@@ -70,7 +70,7 @@ An AttributeNode consists of a QName and a String.
 data AttributeNode = AttributeNode QName String
 */
 
-class Param {
+export class Param {
     constructor(localName, string) {
         this.localName = localName;
         this.string = string;
@@ -88,7 +88,7 @@ class Param {
 /*
 map is an array of [(Prefix, Uri)] mappings
 */
-class Context {
+export class Context {
     constructor(uri, map) {
         this.uri = uri;
         this.map = map;
@@ -107,7 +107,7 @@ class Context {
     }
 }
 
-class Datatype {
+export class Datatype {
     constructor(uri, localName) {
         this.uri = uri;
         this.localName = localName;
@@ -130,7 +130,7 @@ data NameClass = AnyName
                  | NsNameExcept Uri NameClass
                  | NameClassChoice NameClass NameClass
 */
-class AnyName {
+export class AnyName {
     toHTML() {
         return "<table><tr><th>AnyName</th></tr></table>";
     }
@@ -140,7 +140,7 @@ class AnyName {
     }
 }
 
-class AnyNameExcept {
+export class AnyNameExcept {
     constructor(nameClass) {
         this.nameClass = nameClass;
     }
@@ -154,7 +154,7 @@ class AnyNameExcept {
     }
 }
 
-class Name {
+export class Name {
     constructor(uri, localName) {
         this.uri = uri;
         this.localName = localName;
@@ -169,7 +169,7 @@ class Name {
     }
 }
 
-class NsName {
+export class NsName {
     constructor(uri) {
         this.uri = uri;
     }
@@ -183,7 +183,7 @@ class NsName {
     }
 }
 
-class NsNameExcept {
+export class NsNameExcept {
     constructor(uri, nameClass) {
         this.uri = uri;
         this.nameClass = nameClass;
@@ -198,7 +198,7 @@ class NsNameExcept {
     }
 }
 
-class NameClassChoice {
+export class NameClassChoice {
     constructor(nameClass1, nameClass2) {
         this.nameClass1 = nameClass1;
         this.nameClass2 = nameClass2;
@@ -229,7 +229,7 @@ data Pattern = Empty
                | Element NameClass Pattern
                | After Pattern Pattern
 */
-class Empty {
+export class Empty {
     toHTML() {
         return "<table><tr><th>Empty</th></tr></table>";
     }
@@ -242,7 +242,7 @@ class Empty {
 /*
 priority gives a rank of pertinence between NotAllowed message
 */
-class NotAllowed {
+export class NotAllowed {
     constructor(message, pattern, childNode, priority) {
         this.message = message;
         this.pattern = pattern;
@@ -266,7 +266,7 @@ class NotAllowed {
     }
 }
 
-class MissingContent extends NotAllowed {
+export class MissingContent extends NotAllowed {
     constructor(message, pattern, childNode, priority) {
         this.message = message;
         this.pattern = pattern;
@@ -292,7 +292,7 @@ class MissingContent extends NotAllowed {
 
 MissingContent.constructor = NotAllowed;
 
-class Text {
+export class Text {
     toHTML() {
         return "<table><tr><th>Text</th></tr></table>";
     }
@@ -302,7 +302,7 @@ class Text {
     }
 }
 
-class Choice {
+export class Choice {
     constructor(pattern1, pattern2) {
         this.pattern1 = pattern1;
         this.pattern2 = pattern2;
@@ -317,7 +317,7 @@ class Choice {
     }
 }
 
-class Interleave {
+export class Interleave {
     constructor(pattern1, pattern2) {
         this.pattern1 = pattern1;
         this.pattern2 = pattern2;
@@ -332,7 +332,7 @@ class Interleave {
     }
 }
 
-class Group {
+export class Group {
     constructor(pattern1, pattern2) {
         this.pattern1 = pattern1;
         this.pattern2 = pattern2;
@@ -347,7 +347,7 @@ class Group {
     }
 }
 
-class OneOrMore {
+export class OneOrMore {
     constructor(pattern) {
         this.pattern = pattern;
     }
@@ -361,7 +361,7 @@ class OneOrMore {
     }
 }
 
-class List {
+export class List {
     constructor(pattern) {
         this.pattern = pattern;
     }
@@ -375,7 +375,7 @@ class List {
     }
 }
 
-class Data {
+export class Data {
     constructor(datatype, paramList) {
         this.datatype = datatype;
         this.paramList = paramList;
@@ -395,7 +395,7 @@ class Data {
     }
 }
 
-class DataExcept {
+export class DataExcept {
     constructor(datatype, paramList, pattern) {
         this.datatype = datatype;
         this.paramList = paramList;
@@ -416,7 +416,7 @@ class DataExcept {
     }
 }
 
-class Value {
+export class Value {
     constructor(datatype, string, context) {
         this.datatype = datatype;
         this.string = string;
@@ -435,7 +435,7 @@ class Value {
 /*
 defaultValue must be an instance of Value
 */
-class Attribute {
+export class Attribute {
     constructor(nameClass, pattern, defaultValue) {
         this.nameClass = nameClass;
         this.pattern = pattern;
@@ -455,7 +455,7 @@ class Attribute {
     }
 }
 
-class Element {
+export class Element {
     constructor(nameClass, pattern) {
         this.nameClass = nameClass;
         this.pattern = pattern;
@@ -470,7 +470,7 @@ class Element {
     }
 }
 
-class After {
+export class After {
     constructor(pattern1, pattern2) {
         this.pattern1 = pattern1;
         this.pattern2 = pattern2;
@@ -485,7 +485,7 @@ class After {
     }
 }
 
-class QName {
+export class QName {
     constructor(uri, localName) {
         this.uri = uri;
         this.localName = localName;
@@ -504,7 +504,7 @@ class QName {
 data ChildNode = ElementNode QName Context [AttributeNode] [ChildNode]
                  | TextNode String
 */
-class ElementNode {
+export class ElementNode {
     constructor(qName, context, attributeNodes, childNodes) {
         this.qName = qName;
         this.context = context;
@@ -519,7 +519,7 @@ class ElementNode {
     /*
     used for augmenting the XML instance, by default does not do anything
     */
-    addAttribute(pattern) {}
+    addAttribute(pattern) { }
 
     toHTML() {
         let string = "<table><tr><th>ElementNode</th></tr><tr><td>qName</td><td>" + this.qName.toHTML() + "</td></tr><tr><td>context</td><td>" + this.context.toHTML() + "</td></tr><tr><td>attributeNodes</td><td><table>";
@@ -542,7 +542,7 @@ class ElementNode {
     }
 }
 
-class TextNode {
+export class TextNode {
     constructor(string) {
         this.string = string;
     }
@@ -556,7 +556,7 @@ class TextNode {
     }
 }
 
-class AttributeNode {
+export class AttributeNode {
     constructor(qName, string) {
         this.qName = qName;
         this.string = string;
@@ -565,7 +565,7 @@ class AttributeNode {
     /*
     used for augmenting the XML instance, by default does not do anything
     */
-    setType(type) {}
+    setType(type) { }
 
     toHTML() {
         return "<table><tr><th>AttributeNode</th></tr><tr><td>qName</td><td>" + this.qName.toHTML() + "</td></tr><tr><td>string</td><td>" + this.string + "</td></tr></table>";
