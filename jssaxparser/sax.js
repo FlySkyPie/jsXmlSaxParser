@@ -13,84 +13,11 @@ import { StringReader } from './Reader';
 import { XMLFilterImpl2 } from './XMLFilterImpls';
 import { SAXScanner } from './SAXScanner';
 import { Attributes2Impl, AttributesImpl } from './AttributesImpl';
+import {
+    SAXParseException, SAXNotRecognizedException, SAXNotSupportedException, SAXException
+} from './exceptions';
 
 let that = window; // probably window object
-
-/* Private static variables (constant) */
-
-
-// http://www.saxproject.org/apidoc/org/xml/sax/SAXException.html
-export class SAXException extends Error {
-    constructor(message, exception) { // java.lang.Exception
-        this.message = message;
-        this.exception = exception;
-    }
-
-    getMessage() {
-        return this.message;
-    }
-
-    getException() {
-        return this.exception;
-    }
-}
-
-SAXException.constructor = SAXException;
-
-// Not fully implemented
-// http://www.saxproject.org/apidoc/org/xml/sax/SAXNotSupportedException.html
-export class SAXNotSupportedException extends SAXException {
-    constructor(msg) { // java.lang.Exception
-        this.message = msg || '';
-    }
-}
-
-SAXNotSupportedException.constructor = SAXNotSupportedException;
-
-// http://www.saxproject.org/apidoc/org/xml/sax/SAXNotRecognizedException.html
-export class SAXNotRecognizedException extends SAXException {
-    constructor(msg) { // java.lang.Exception
-        this.message = msg || '';
-    }
-}
-
-SAXNotRecognizedException.constructor = SAXNotRecognizedException;
-
-//This constructor is more complex and not presently implemented;
-//  see Java API to implement additional arguments correctly
-// http://www.saxproject.org/apidoc/org/xml/sax/SAXParseException.html
-export class SAXParseException extends SAXException {
-    constructor(msg, locator) { // java.lang.Exception //
-        this.message = msg || '';
-        this.locator = locator;
-    }
-
-    getColumnNumber() {
-        if (this.locator) {
-            return this.locator.getColumnNumber();
-        }
-    }
-
-    getLineNumber() {
-        if (this.locator) {
-            return this.locator.getLineNumber();
-        }
-    }
-
-    getPublicId() {
-        if (this.locator) {
-            return this.locator.getPublicId();
-        }
-    }
-
-    getSystemId() {
-        if (this.locator) {
-            return this.locator.getSystemId();
-        }
-    }
-}
-
-SAXParseException.constructor = SAXParseException;
 
 // NOTES:
 // 1) The following notes might not be perfectly up to date
@@ -1037,4 +964,4 @@ export class XMLReaderFactory {
     }
 }
 
-XMLReaderFactory.checkDependencies();
+// XMLReaderFactory.checkDependencies();

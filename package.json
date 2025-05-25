@@ -1,6 +1,6 @@
 {
   "name": "@flyskypie/xml-sax-parser",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "module": "./jssaxparser/sax.js",
   "exports": {
     ".": {
@@ -26,6 +26,7 @@
   "devDependencies": {
     "eslint": "^9.27.0",
     "eslint-interactive": "^11.1.0",
+    "globals": "^16.1.0",
     "vite-plugin-eslint": "^1.8.1"
   }
 }

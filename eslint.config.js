@@ -1,4 +1,5 @@
 // eslint.config.js
+import globals from "globals";
 import { defineConfig } from "eslint/config";
 
 export default defineConfig([
@@ -13,5 +14,10 @@ export default defineConfig([
             // "prefer-const": "error",
         },
         "ignores": ["public/**/*"],
+        languageOptions: {
+            globals: {
+                ...globals.browser,
+            },
+        },
     },
 ]);
