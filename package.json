@@ -1,16 +1,31 @@
 {
   "name": "@flyskypie/xml-sax-parser",
-  "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
+  "module": "./jssaxparser/sax.js",
+  "exports": {
+    ".": {
+      "import": "./jssaxparser/sax.js"
+    },
+    "./*": "./jssaxparser/*"
+  },
   "type": "module",
+  "license": "Apache-2.0",
+  "files": [
+    "jssaxparser",
+    "LICENSE",
+    "package.json",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/FlySkyPie/jsXmlSaxParser"
+  },
   "scripts": {
-    "build": "vite build",
     "eslint": "eslint-interactive"
   },
   "devDependencies": {
     "eslint": "^9.27.0",
     "eslint-interactive": "^11.1.0",
-    "vite": "^6.3.5",
     "vite-plugin-eslint": "^1.8.1"
   }
 }

@@ -1,7 +1,7 @@
 import { ReaderWrapper } from './ReaderWrapper';
 import { StringReader } from './Reader';
 import { NamespaceSupport } from './NamespaceSupport';
-import { SAXParseException } from './sax';
+import { SAXParser, SAXParseException } from './sax';
 
 /*
 This is the private API for SAX parsing
