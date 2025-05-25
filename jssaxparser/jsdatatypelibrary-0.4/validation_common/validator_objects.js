@@ -70,45 +70,57 @@ An AttributeNode consists of a QName and a String.
 data AttributeNode = AttributeNode QName String
 */
 
-function Param(localName, string) {
-    this.localName = localName;
-    this.string = string;
+class Param {
+    constructor(localName, string) {
+        this.localName = localName;
+        this.string = string;
+    }
+
+    toHTML() {
+        return "<table><tr><th>Param</th></tr><tr><td>localName</td><td>" + this.localName + "</td></tr><tr><td>string</td><td>" + this.string + "</td></tr></table>";
+    }
+
+    toString() {
+        return "Param";
+    }
 }
-Param.prototype.toHTML = function() {
-    return "<table><tr><th>Param</th></tr><tr><td>localName</td><td>" + this.localName + "</td></tr><tr><td>string</td><td>" + this.string + "</td></tr></table>";
-};
-Param.prototype.toString = function() {
-    return "Param";
-};
 
 /*
 map is an array of [(Prefix, Uri)] mappings
 */
-function Context(uri, map) {
-    this.uri = uri;
-    this.map = map;
-}
-Context.prototype.toHTML = function() {
-    let string = "<table><tr><th>Context</th></tr><tr><td>uri</td><td>" + this.uri + "</td></tr><tr><td><table><tr><th>map</th></tr>";
-    for (let i in this.map) {
-        string += "<tr><td>" + i + "</td><td>" + this.map[i] + "</td></tr>";
+class Context {
+    constructor(uri, map) {
+        this.uri = uri;
+        this.map = map;
     }
-    return string + "</table></td></tr></table>";
-};
-Context.prototype.toString = function() {
-    return "Context";
-};
 
-function Datatype(uri, localName) {
-    this.uri = uri;
-    this.localName = localName;
+    toHTML() {
+        let string = "<table><tr><th>Context</th></tr><tr><td>uri</td><td>" + this.uri + "</td></tr><tr><td><table><tr><th>map</th></tr>";
+        for (let i in this.map) {
+            string += "<tr><td>" + i + "</td><td>" + this.map[i] + "</td></tr>";
+        }
+        return string + "</table></td></tr></table>";
+    }
+
+    toString() {
+        return "Context";
+    }
 }
-Datatype.prototype.toHTML = function() {
-    return "<table><tr><th>Datatype</th></tr><tr><td>uri</td><td>" + this.uri + "</td></tr><tr><td>localName</td><td>" + this.localName + "</td></tr></table>";
-};
-Datatype.prototype.toString = function() {
-    return "Datatype";
-};
+
+class Datatype {
+    constructor(uri, localName) {
+        this.uri = uri;
+        this.localName = localName;
+    }
+
+    toHTML() {
+        return "<table><tr><th>Datatype</th></tr><tr><td>uri</td><td>" + this.uri + "</td></tr><tr><td>localName</td><td>" + this.localName + "</td></tr></table>";
+    }
+
+    toString() {
+        return "Datatype";
+    }
+}
 
 /*
 data NameClass = AnyName
@@ -118,66 +130,88 @@ data NameClass = AnyName
                  | NsNameExcept Uri NameClass
                  | NameClassChoice NameClass NameClass
 */
-function AnyName() {}
-AnyName.prototype.toHTML = function() {
-    return "<table><tr><th>AnyName</th></tr></table>";
-};
-AnyName.prototype.toString = function() {
-    return "AnyName";
-};
+class AnyName {
+    toHTML() {
+        return "<table><tr><th>AnyName</th></tr></table>";
+    }
 
-function AnyNameExcept(nameClass) {
-    this.nameClass = nameClass;
+    toString() {
+        return "AnyName";
+    }
 }
-AnyNameExcept.prototype.toHTML = function() {
-    return "AnyNameExcept";
-};
-AnyNameExcept.prototype.toString = function() {
-    return "AnyNameExcept";
-};
 
-function Name(uri, localName) {
-    this.uri = uri;
-    this.localName = localName;
-}
-Name.prototype.toHTML = function() {
-    return "<table><tr><th>Name</th></tr><tr><td>uri</td><td>" + this.uri + "</td></tr><tr><td>localName</td><td>" + this.localName + "</td></tr></table>";
-};
-Name.prototype.toString = function() {
-    return "Name";
-};
+class AnyNameExcept {
+    constructor(nameClass) {
+        this.nameClass = nameClass;
+    }
 
-function NsName(uri) {
-    this.uri = uri;
-}
-NsName.prototype.toHTML = function() {
-    return "<table><tr><th>NsName</th></tr><tr><td>uri</td><td>" + this.uri + "</td></tr></table>";
-};
-NsName.prototype.toString = function() {
-    return "NsName";
-};
-function NsNameExcept(uri, nameClass) {
-    this.uri = uri;
-    this.nameClass = nameClass;
-}
-NsNameExcept.prototype.toHTML = function() {
-    return "<table><tr><th>NsNameExcept</th></tr><tr><td>uri</td><td>" + this.uri + "</td></tr><tr><td>nameClass</td><td>" + this.nameClass.toHTML() + "</td></tr></table>";
-};
-NsNameExcept.prototype.toString = function() {
-    return "NsNameExcept";
-};
+    toHTML() {
+        return "AnyNameExcept";
+    }
 
-function NameClassChoice(nameClass1, nameClass2) {
-    this.nameClass1 = nameClass1;
-    this.nameClass2 = nameClass2;
+    toString() {
+        return "AnyNameExcept";
+    }
 }
-NameClassChoice.prototype.toHTML = function() {
-    return "<table><tr><th>NameClassChoice</th></tr><tr><td>nameClass1</td><td>" + this.nameClass1.toHTML() + "</td></tr><tr><td>nameClass2</td><td>" + this.nameClass2.toHTML() + "</td></tr></table>";
-};
-NameClassChoice.prototype.toString = function() {
-    return "NameClassChoice";
-};
 
+class Name {
+    constructor(uri, localName) {
+        this.uri = uri;
+        this.localName = localName;
+    }
+
+    toHTML() {
+        return "<table><tr><th>Name</th></tr><tr><td>uri</td><td>" + this.uri + "</td></tr><tr><td>localName</td><td>" + this.localName + "</td></tr></table>";
+    }
+
+    toString() {
+        return "Name";
+    }
+}
+
+class NsName {
+    constructor(uri) {
+        this.uri = uri;
+    }
+
+    toHTML() {
+        return "<table><tr><th>NsName</th></tr><tr><td>uri</td><td>" + this.uri + "</td></tr></table>";
+    }
+
+    toString() {
+        return "NsName";
+    }
+}
+
+class NsNameExcept {
+    constructor(uri, nameClass) {
+        this.uri = uri;
+        this.nameClass = nameClass;
+    }
+
+    toHTML() {
+        return "<table><tr><th>NsNameExcept</th></tr><tr><td>uri</td><td>" + this.uri + "</td></tr><tr><td>nameClass</td><td>" + this.nameClass.toHTML() + "</td></tr></table>";
+    }
+
+    toString() {
+        return "NsNameExcept";
+    }
+}
+
+class NameClassChoice {
+    constructor(nameClass1, nameClass2) {
+        this.nameClass1 = nameClass1;
+        this.nameClass2 = nameClass2;
+    }
+
+    toHTML() {
+        return "<table><tr><th>NameClassChoice</th></tr><tr><td>nameClass1</td><td>" + this.nameClass1.toHTML() + "</td></tr><tr><td>nameClass2</td><td>" + this.nameClass2.toHTML() + "</td></tr></table>";
+    }
+
+    toString() {
+        return "NameClassChoice";
+    }
+}
 
 /*
 data Pattern = Empty
@@ -195,276 +229,349 @@ data Pattern = Empty
                | Element NameClass Pattern
                | After Pattern Pattern
 */
-function Empty() {}
-Empty.prototype.toHTML = function() {
-    return "<table><tr><th>Empty</th></tr></table>";
-};
-Empty.prototype.toString = function() {
-    return "Empty";
-};
+class Empty {
+    toHTML() {
+        return "<table><tr><th>Empty</th></tr></table>";
+    }
+
+    toString() {
+        return "Empty";
+    }
+}
 
 /*
 priority gives a rank of pertinence between NotAllowed message
 */
-function NotAllowed(message, pattern, childNode, priority) {
-    this.message = message;
-    this.pattern = pattern;
-    this.childNode = childNode;
-    this.priority = priority;
-}
-NotAllowed.prototype.toHTML = function() {
-    let string = "<table><tr><th>NotAllowed</th></tr><tr><td>message</td><td>" + this.message + "</td></tr><tr><td>pattern</td><td>" + this.pattern.toHTML() + "</td></tr><tr><td>childNode</td><td>";
-    //childNode may be a string directly
-    if (this.childNode.toHTML) {
-        string += this.childNode.toHTML();
-    } else {
-        string += this.childNode;
+class NotAllowed {
+    constructor(message, pattern, childNode, priority) {
+        this.message = message;
+        this.pattern = pattern;
+        this.childNode = childNode;
+        this.priority = priority;
     }
-    return string + "</td></tr></table>";
-};
-NotAllowed.prototype.toString = function() {
-    return "NotAllowed";
-};
 
-function MissingContent(message, pattern, childNode, priority) {
-    this.message = message;
-    this.pattern = pattern;
-    this.childNode = childNode;
-    this.priority = priority;
+    toHTML() {
+        let string = "<table><tr><th>NotAllowed</th></tr><tr><td>message</td><td>" + this.message + "</td></tr><tr><td>pattern</td><td>" + this.pattern.toHTML() + "</td></tr><tr><td>childNode</td><td>";
+        //childNode may be a string directly
+        if (this.childNode.toHTML) {
+            string += this.childNode.toHTML();
+        } else {
+            string += this.childNode;
+        }
+        return string + "</td></tr></table>";
+    }
+
+    toString() {
+        return "NotAllowed";
+    }
 }
-MissingContent.prototype = new NotAllowed();
+
+class MissingContent extends NotAllowed {
+    constructor(message, pattern, childNode, priority) {
+        this.message = message;
+        this.pattern = pattern;
+        this.childNode = childNode;
+        this.priority = priority;
+    }
+
+    toHTML() {
+        let string = "<table><tr><th>MissingContent</th></tr><tr><td>message</td><td>" + this.message + "</td></tr><tr><td>pattern</td><td>" + this.pattern.toHTML() + "</td></tr><tr><td>childNode</td><td>";
+        //childNode may be a string directly
+        if (this.childNode.toHTML) {
+            string += this.childNode.toHTML();
+        } else {
+            string += this.childNode;
+        }
+        return string + "</td></tr></table>";
+    }
+
+    toString() {
+        return "MissingContent";
+    }
+}
+
 MissingContent.constructor = NotAllowed;
-MissingContent.prototype.toHTML = function() {
-    let string = "<table><tr><th>MissingContent</th></tr><tr><td>message</td><td>" + this.message + "</td></tr><tr><td>pattern</td><td>" + this.pattern.toHTML() + "</td></tr><tr><td>childNode</td><td>";
-    //childNode may be a string directly
-    if (this.childNode.toHTML) {
-        string += this.childNode.toHTML();
-    } else {
-        string += this.childNode;
+
+class Text {
+    toHTML() {
+        return "<table><tr><th>Text</th></tr></table>";
     }
-    return string + "</td></tr></table>";
-};
-MissingContent.prototype.toString = function() {
-    return "MissingContent";
-};
 
-function Text() {}
-Text.prototype.toHTML = function() {
-    return "<table><tr><th>Text</th></tr></table>";
-};
-Text.prototype.toString = function() {
-    return "Text";
-};
-
-function Choice(pattern1, pattern2) {
-    this.pattern1 = pattern1;
-    this.pattern2 = pattern2;
-}
-Choice.prototype.toHTML = function() {
-    return "<table><tr><th>Choice</th></tr><tr><td>pattern1</td><td>" + this.pattern1.toHTML() + "</td></tr><tr><td>pattern2</td><td>" + this.pattern2.toHTML() + "</td></tr></table>";
-};
-Choice.prototype.toString = function() {
-    return "Choice";
-};
-
-function Interleave(pattern1, pattern2) {
-    this.pattern1 = pattern1;
-    this.pattern2 = pattern2;
-}
-Interleave.prototype.toHTML = function() {
-    return "<table><tr><th>Interleave</th></tr><tr><td>pattern1</td><td>" + this.pattern1.toHTML() + "</td></tr><tr><td>pattern2</td><td>" + this.pattern2.toHTML() + "</td></tr></table>";
-};
-Interleave.prototype.toString = function() {
-    return "Interleave";
-};
-
-function Group(pattern1, pattern2) {
-    this.pattern1 = pattern1;
-    this.pattern2 = pattern2;
-}
-Group.prototype.toHTML = function() {
-    return "<table><tr><th>Group</th></tr><tr><td>pattern1</td><td>" + this.pattern1.toHTML() + "</td></tr><tr><td>pattern2</td><td>" + this.pattern2.toHTML() + "</td></tr></table>";
-};
-Group.prototype.toString = function() {
-    return "Group";
-};
-
-function OneOrMore(pattern) {
-    this.pattern = pattern;
-}
-OneOrMore.prototype.toHTML = function() {
-    return "<table><tr><th>OneOrMore</th></tr><tr><td>pattern</td><td>" + this.pattern.toHTML() + "</td></tr></table>";
-};
-OneOrMore.prototype.toString = function() {
-    return "OneOrMore";
-};
-
-function List(pattern) {
-    this.pattern = pattern;
-}
-List.prototype.toHTML = function() {
-    return "<table><tr><th>List</th></tr><tr><td>pattern</td><td>" + this.pattern.toHTML() + "</td></tr></table>";
-};
-List.prototype.toString = function() {
-    return "List";
-};
-
-function Data(datatype, paramList) {
-    this.datatype = datatype;
-    this.paramList = paramList;
-}
-Data.prototype.toHTML = function() {
-    let string = "<table><tr><th>Data</th></tr><tr><td>datatype</td><td>" + this.datatype.toHTML() + "</td></tr><tr><td><table><tr><th>paramList</th></tr>"
-    let i = this.paramList.length;
-    while (i--) {
-        string += "<tr><td>" + this.paramList[i].toHTML() + "</td></tr>";
+    toString() {
+        return "Text";
     }
-    return string + "</table></td></tr></table>";
-};
-Data.prototype.toString = function() {
-    return "Data";
-};
-
-function DataExcept(datatype, paramList, pattern) {
-    this.datatype = datatype;
-    this.paramList = paramList;
-    this.pattern = pattern;
 }
-DataExcept.prototype.toHTML = function() {
-    let string = "<table><tr><th>DataExcept</th></tr><tr><td>datatype</td><td>" + this.datatype.toHTML() + "</td></tr><tr><td><table><tr><th>paramList</th></tr>"
-    let i = this.paramList.length;
-    while (i--) {
-        string += "<tr><td>" + this.paramList[i].toHTML() + "</td></tr>";
+
+class Choice {
+    constructor(pattern1, pattern2) {
+        this.pattern1 = pattern1;
+        this.pattern2 = pattern2;
     }
-    return string + "</table></td></tr><tr><td>pattern</td><td>" + this.pattern.toHTML() + "</td></tr></table>";
-};
-DataExcept.prototype.toString = function() {
-    return "DataExcept";
-};
 
-function Value(datatype, string, context) {
-    this.datatype = datatype;
-    this.string = string;
-    this.context = context;
+    toHTML() {
+        return "<table><tr><th>Choice</th></tr><tr><td>pattern1</td><td>" + this.pattern1.toHTML() + "</td></tr><tr><td>pattern2</td><td>" + this.pattern2.toHTML() + "</td></tr></table>";
+    }
+
+    toString() {
+        return "Choice";
+    }
 }
-Value.prototype.toHTML = function() {
-    return "<table><tr><th>Data</th></tr><tr><td>datatype</td><td>" + this.datatype.toHTML() + "</td></tr><tr><td>string</td><td>" + this.string + "</td></tr><tr><td>context</td><td>" + this.context.toHTML() + "</td></tr></table>";
-};
-Value.prototype.toString = function() {
-    return "Value";
-};
+
+class Interleave {
+    constructor(pattern1, pattern2) {
+        this.pattern1 = pattern1;
+        this.pattern2 = pattern2;
+    }
+
+    toHTML() {
+        return "<table><tr><th>Interleave</th></tr><tr><td>pattern1</td><td>" + this.pattern1.toHTML() + "</td></tr><tr><td>pattern2</td><td>" + this.pattern2.toHTML() + "</td></tr></table>";
+    }
+
+    toString() {
+        return "Interleave";
+    }
+}
+
+class Group {
+    constructor(pattern1, pattern2) {
+        this.pattern1 = pattern1;
+        this.pattern2 = pattern2;
+    }
+
+    toHTML() {
+        return "<table><tr><th>Group</th></tr><tr><td>pattern1</td><td>" + this.pattern1.toHTML() + "</td></tr><tr><td>pattern2</td><td>" + this.pattern2.toHTML() + "</td></tr></table>";
+    }
+
+    toString() {
+        return "Group";
+    }
+}
+
+class OneOrMore {
+    constructor(pattern) {
+        this.pattern = pattern;
+    }
+
+    toHTML() {
+        return "<table><tr><th>OneOrMore</th></tr><tr><td>pattern</td><td>" + this.pattern.toHTML() + "</td></tr></table>";
+    }
+
+    toString() {
+        return "OneOrMore";
+    }
+}
+
+class List {
+    constructor(pattern) {
+        this.pattern = pattern;
+    }
+
+    toHTML() {
+        return "<table><tr><th>List</th></tr><tr><td>pattern</td><td>" + this.pattern.toHTML() + "</td></tr></table>";
+    }
+
+    toString() {
+        return "List";
+    }
+}
+
+class Data {
+    constructor(datatype, paramList) {
+        this.datatype = datatype;
+        this.paramList = paramList;
+    }
+
+    toHTML() {
+        let string = "<table><tr><th>Data</th></tr><tr><td>datatype</td><td>" + this.datatype.toHTML() + "</td></tr><tr><td><table><tr><th>paramList</th></tr>"
+        let i = this.paramList.length;
+        while (i--) {
+            string += "<tr><td>" + this.paramList[i].toHTML() + "</td></tr>";
+        }
+        return string + "</table></td></tr></table>";
+    }
+
+    toString() {
+        return "Data";
+    }
+}
+
+class DataExcept {
+    constructor(datatype, paramList, pattern) {
+        this.datatype = datatype;
+        this.paramList = paramList;
+        this.pattern = pattern;
+    }
+
+    toHTML() {
+        let string = "<table><tr><th>DataExcept</th></tr><tr><td>datatype</td><td>" + this.datatype.toHTML() + "</td></tr><tr><td><table><tr><th>paramList</th></tr>"
+        let i = this.paramList.length;
+        while (i--) {
+            string += "<tr><td>" + this.paramList[i].toHTML() + "</td></tr>";
+        }
+        return string + "</table></td></tr><tr><td>pattern</td><td>" + this.pattern.toHTML() + "</td></tr></table>";
+    }
+
+    toString() {
+        return "DataExcept";
+    }
+}
+
+class Value {
+    constructor(datatype, string, context) {
+        this.datatype = datatype;
+        this.string = string;
+        this.context = context;
+    }
+
+    toHTML() {
+        return "<table><tr><th>Data</th></tr><tr><td>datatype</td><td>" + this.datatype.toHTML() + "</td></tr><tr><td>string</td><td>" + this.string + "</td></tr><tr><td>context</td><td>" + this.context.toHTML() + "</td></tr></table>";
+    }
+
+    toString() {
+        return "Value";
+    }
+}
 
 /*
 defaultValue must be an instance of Value
 */
-function Attribute(nameClass, pattern, defaultValue) {
-    this.nameClass = nameClass;
-    this.pattern = pattern;
-    this.defaultValue = defaultValue;
-}
-Attribute.prototype.toHTML = function() {
-    let string = "<table><tr><th>Attribute</th></tr><tr><td>nameClass</td><td>" + this.nameClass.toHTML() + "</td></tr><tr><td>pattern</td><td>" + this.pattern.toHTML() + "</td></tr></table>";
-    if (this.defaultValue) {
-        string += "</td></tr><tr><td>defaultValue</td><td>" + this.defaultValue.toHTML();
+class Attribute {
+    constructor(nameClass, pattern, defaultValue) {
+        this.nameClass = nameClass;
+        this.pattern = pattern;
+        this.defaultValue = defaultValue;
     }
-    return string + "</td></tr></table>";
-};
-Attribute.prototype.toString = function() {
-    return "Attribute";
-};
 
-function Element(nameClass, pattern) {
-    this.nameClass = nameClass;
-    this.pattern = pattern;
+    toHTML() {
+        let string = "<table><tr><th>Attribute</th></tr><tr><td>nameClass</td><td>" + this.nameClass.toHTML() + "</td></tr><tr><td>pattern</td><td>" + this.pattern.toHTML() + "</td></tr></table>";
+        if (this.defaultValue) {
+            string += "</td></tr><tr><td>defaultValue</td><td>" + this.defaultValue.toHTML();
+        }
+        return string + "</td></tr></table>";
+    }
+
+    toString() {
+        return "Attribute";
+    }
 }
-Element.prototype.toHTML = function() {
-    return "<table><tr><th>Element</th></tr><tr><td>nameClass</td><td>" + this.nameClass.toHTML() + "</td></tr><tr><td>pattern</td><td>" + this.pattern.toHTML() + "</td></tr></table>";
-};
-Element.prototype.toString = function() {
-    return "Element";
-};
 
-function After(pattern1, pattern2) {
-    this.pattern1 = pattern1;
-    this.pattern2 = pattern2;
+class Element {
+    constructor(nameClass, pattern) {
+        this.nameClass = nameClass;
+        this.pattern = pattern;
+    }
+
+    toHTML() {
+        return "<table><tr><th>Element</th></tr><tr><td>nameClass</td><td>" + this.nameClass.toHTML() + "</td></tr><tr><td>pattern</td><td>" + this.pattern.toHTML() + "</td></tr></table>";
+    }
+
+    toString() {
+        return "Element";
+    }
 }
-After.prototype.toHTML = function() {
-    return "<table><tr><th>After</th></tr><tr><td>pattern1</td><td>" + this.pattern1.toHTML() + "</td></tr><tr><td>pattern2</td><td>" + this.pattern2.toHTML() + "</td></tr></table>";
-};
-After.prototype.toString = function() {
-    return "After";
-};
 
+class After {
+    constructor(pattern1, pattern2) {
+        this.pattern1 = pattern1;
+        this.pattern2 = pattern2;
+    }
 
-function QName(uri, localName) {
-    this.uri = uri;
-    this.localName = localName;
+    toHTML() {
+        return "<table><tr><th>After</th></tr><tr><td>pattern1</td><td>" + this.pattern1.toHTML() + "</td></tr><tr><td>pattern2</td><td>" + this.pattern2.toHTML() + "</td></tr></table>";
+    }
+
+    toString() {
+        return "After";
+    }
 }
-QName.prototype.toHTML = function() {
-    return "<table><tr><th>QName</th></tr><tr><td>uri</td><td>" + this.uri + "</td></tr><tr><td>localName</td><td>" + this.localName + "</td></tr></table>";
-};
-QName.prototype.toString = function() {
-    return "QName";
-};
+
+class QName {
+    constructor(uri, localName) {
+        this.uri = uri;
+        this.localName = localName;
+    }
+
+    toHTML() {
+        return "<table><tr><th>QName</th></tr><tr><td>uri</td><td>" + this.uri + "</td></tr><tr><td>localName</td><td>" + this.localName + "</td></tr></table>";
+    }
+
+    toString() {
+        return "QName";
+    }
+}
 
 /*
 data ChildNode = ElementNode QName Context [AttributeNode] [ChildNode]
                  | TextNode String
 */
-function ElementNode(qName, context, attributeNodes, childNodes) {
-    this.qName = qName;
-    this.context = context;
-    this.attributeNodes = attributeNodes;
-    this.childNodes = childNodes;
-}
-ElementNode.prototype.setParentNode = function(parentNode) {
-    this.parentNode = parentNode;
-};
-/*
-used for augmenting the XML instance, by default does not do anything
-*/
-ElementNode.prototype.addAttribute = function(pattern) {};
-
-ElementNode.prototype.toHTML = function() {
-    let string = "<table><tr><th>ElementNode</th></tr><tr><td>qName</td><td>" + this.qName.toHTML() + "</td></tr><tr><td>context</td><td>" + this.context.toHTML() + "</td></tr><tr><td>attributeNodes</td><td><table>";
-    for (var i in this.attributeNodes) {
-        string += "<tr><td>" + this.attributeNodes[i].toHTML() + "</td></tr>";
+class ElementNode {
+    constructor(qName, context, attributeNodes, childNodes) {
+        this.qName = qName;
+        this.context = context;
+        this.attributeNodes = attributeNodes;
+        this.childNodes = childNodes;
     }
-    string += "</table></td></tr><tr><td>childNodes</td><td><table>";
-    for (var i = 0; i < this.childNodes.length; i++) {
-        string += "<tr><td>" + this.childNodes[i].toHTML() + "</td></tr>";
-    }
-    string += "</table>";
-    if (this.parentNode) {
-        string += "</td></tr><tr><td>parentNode</td><td>" + this.parentNode.qName.localName;
-    }
-    return string + "</td></tr></table>";
-};
-ElementNode.prototype.toString = function() {
-    return "ElementNode";
-};
 
-function TextNode(string) {
-    this.string = string;
-}
-TextNode.prototype.toHTML = function() {
-    return "<table><tr><th>TextNode</th></tr><tr><td>string</td><td>[" + this.string + "]</td></tr></table>";
-};
-TextNode.prototype.toString = function() {
-    return "TextNode";
-};
+    setParentNode(parentNode) {
+        this.parentNode = parentNode;
+    }
 
-function AttributeNode(qName, string) {
-    this.qName = qName;
-    this.string = string;
+    /*
+    used for augmenting the XML instance, by default does not do anything
+    */
+    addAttribute(pattern) {}
+
+    toHTML() {
+        let string = "<table><tr><th>ElementNode</th></tr><tr><td>qName</td><td>" + this.qName.toHTML() + "</td></tr><tr><td>context</td><td>" + this.context.toHTML() + "</td></tr><tr><td>attributeNodes</td><td><table>";
+        for (var i in this.attributeNodes) {
+            string += "<tr><td>" + this.attributeNodes[i].toHTML() + "</td></tr>";
+        }
+        string += "</table></td></tr><tr><td>childNodes</td><td><table>";
+        for (var i = 0; i < this.childNodes.length; i++) {
+            string += "<tr><td>" + this.childNodes[i].toHTML() + "</td></tr>";
+        }
+        string += "</table>";
+        if (this.parentNode) {
+            string += "</td></tr><tr><td>parentNode</td><td>" + this.parentNode.qName.localName;
+        }
+        return string + "</td></tr></table>";
+    }
+
+    toString() {
+        return "ElementNode";
+    }
 }
-/*
-used for augmenting the XML instance, by default does not do anything
-*/
-AttributeNode.prototype.setType = function(type) {};
-AttributeNode.prototype.toHTML = function() {
-    return "<table><tr><th>AttributeNode</th></tr><tr><td>qName</td><td>" + this.qName.toHTML() + "</td></tr><tr><td>string</td><td>" + this.string + "</td></tr></table>";
-};
-AttributeNode.prototype.toString = function() {
-    return "AttributeNode";
-};
+
+class TextNode {
+    constructor(string) {
+        this.string = string;
+    }
+
+    toHTML() {
+        return "<table><tr><th>TextNode</th></tr><tr><td>string</td><td>[" + this.string + "]</td></tr></table>";
+    }
+
+    toString() {
+        return "TextNode";
+    }
+}
+
+class AttributeNode {
+    constructor(qName, string) {
+        this.qName = qName;
+        this.string = string;
+    }
+
+    /*
+    used for augmenting the XML instance, by default does not do anything
+    */
+    setType(type) {}
+
+    toHTML() {
+        return "<table><tr><th>AttributeNode</th></tr><tr><td>qName</td><td>" + this.qName.toHTML() + "</td></tr><tr><td>string</td><td>" + this.string + "</td></tr></table>";
+    }
+
+    toString() {
+        return "AttributeNode";
+    }
+}

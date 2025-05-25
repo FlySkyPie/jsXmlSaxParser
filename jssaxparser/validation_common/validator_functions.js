@@ -1,18 +1,18 @@
 /*
 that is the implementation of the following algorithm : http://www.thaiopensource.com/relaxng/derivative.html
 */
-function ValidatorFunctions(relaxNGValidator, datatypeLibrary) {
-    this.relaxNGValidator = relaxNGValidator;
-    this.datatypeLibrary = datatypeLibrary;
-}
-
-ValidatorFunctions.prototype.debug = function(message, pattern, childNode) {
-    if (this.relaxNGValidator.debug) {
-        recordStep(message, pattern, childNode);
+class ValidatorFunctions {
+    constructor(relaxNGValidator, datatypeLibrary) {
+        this.relaxNGValidator = relaxNGValidator;
+        this.datatypeLibrary = datatypeLibrary;
     }
-};
-    
-    
+
+    debug(message, pattern, childNode) {
+        if (this.relaxNGValidator.debug) {
+            recordStep(message, pattern, childNode);
+        }
+    }
+
     /*
     contains :: NameClass -> QName -> Bool
     contains AnyName _ = True
@@ -22,22 +22,22 @@ ValidatorFunctions.prototype.debug = function(message, pattern, childNode) {
     contains (Name ns1 ln1) (QName ns2 ln2) = (ns1 == ns2) && (ln1 == ln2)
     contains (NameClassChoice nc1 nc2) n = (contains nc1 n) || (contains nc2 n)
     */
-ValidatorFunctions.prototype.contains = function(nameClass, qName) {
-    if (nameClass instanceof AnyName) {
-        return true;
-    } else if (nameClass instanceof AnyNameExcept) {
-        return !this.contains(nameClass.nameClass);
-    } else if (nameClass instanceof NsName) {
-        return nameClass.uri == qName.uri;
-    } else if (nameClass instanceof NsNameExcept) {
-        return (nameClass.uri == qName.uri && !this.contains(nameClass.nameClass, qName));
-    } else if (nameClass instanceof Name) {
-        return (nameClass.uri == qName.uri && nameClass.localName == qName.localName);
-    } else if (nameClass instanceof NameClassChoice) {
-        return this.contains(nameClass.nameClass1, qName) || this.contains(nameClass.nameClass2, qName);
+    contains(nameClass, qName) {
+        if (nameClass instanceof AnyName) {
+            return true;
+        } else if (nameClass instanceof AnyNameExcept) {
+            return !this.contains(nameClass.nameClass);
+        } else if (nameClass instanceof NsName) {
+            return nameClass.uri == qName.uri;
+        } else if (nameClass instanceof NsNameExcept) {
+            return (nameClass.uri == qName.uri && !this.contains(nameClass.nameClass, qName));
+        } else if (nameClass instanceof Name) {
+            return (nameClass.uri == qName.uri && nameClass.localName == qName.localName);
+        } else if (nameClass instanceof NameClassChoice) {
+            return this.contains(nameClass.nameClass1, qName) || this.contains(nameClass.nameClass2, qName);
+        }
+        throw new Error('Unexpected result for ValidatorFunctions.contains() ' + nameClass.toString());
     }
-    throw new Error('Unexpected result for ValidatorFunctions.contains() ' + nameClass.toString());
-};
 
     /*
     nullable:: Pattern -> Bool
@@ -56,39 +56,39 @@ ValidatorFunctions.prototype.contains = function(nameClass, qName) {
     nullable Text = True
     nullable (After _ _) = False
     */
-ValidatorFunctions.prototype.nullable = function(pattern) {
-    if (pattern instanceof Group) {
-        return this.nullable(pattern.pattern1) && this.nullable(pattern.pattern2);
-    } else if (pattern instanceof Interleave) {
-        return this.nullable(pattern.pattern1) && this.nullable(pattern.pattern2);
-    } else if (pattern instanceof Choice) {
-        return this.nullable(pattern.pattern1) || this.nullable(pattern.pattern2);
-    } else if (pattern instanceof OneOrMore) {
-        return this.nullable(pattern.pattern);
-    } else if (pattern instanceof Element) {
-        return false;
-    } else if (pattern instanceof Attribute) {
-        return false;
-    } else if (pattern instanceof List) {
-        return false;
-    } else if (pattern instanceof Value) {
-        return false;
-    } else if (pattern instanceof Data) {
-        return false;
-    } else if (pattern instanceof DataExcept) {
-        return false;
-    } else if (pattern instanceof NotAllowed) {
-        return false;
-    } else if (pattern instanceof Empty) {
-        return true;
-    } else if (pattern instanceof Text) {
-        return true;
-    } else if (pattern instanceof After) {
-        return false;
-    } 
-    throw new Error('Unexpected result for ValidatorFunctions.nullable() ' + pattern);
-};
-    
+    nullable(pattern) {
+        if (pattern instanceof Group) {
+            return this.nullable(pattern.pattern1) && this.nullable(pattern.pattern2);
+        } else if (pattern instanceof Interleave) {
+            return this.nullable(pattern.pattern1) && this.nullable(pattern.pattern2);
+        } else if (pattern instanceof Choice) {
+            return this.nullable(pattern.pattern1) || this.nullable(pattern.pattern2);
+        } else if (pattern instanceof OneOrMore) {
+            return this.nullable(pattern.pattern);
+        } else if (pattern instanceof Element) {
+            return false;
+        } else if (pattern instanceof Attribute) {
+            return false;
+        } else if (pattern instanceof List) {
+            return false;
+        } else if (pattern instanceof Value) {
+            return false;
+        } else if (pattern instanceof Data) {
+            return false;
+        } else if (pattern instanceof DataExcept) {
+            return false;
+        } else if (pattern instanceof NotAllowed) {
+            return false;
+        } else if (pattern instanceof Empty) {
+            return true;
+        } else if (pattern instanceof Text) {
+            return true;
+        } else if (pattern instanceof After) {
+            return false;
+        } 
+        throw new Error('Unexpected result for ValidatorFunctions.nullable() ' + pattern);
+    }
+
     /*
     childDeriv :: Context -> Pattern -> ChildNode -> Pattern
     childDeriv cx p (TextNode s) = textDeriv cx p s
@@ -99,24 +99,24 @@ ValidatorFunctions.prototype.nullable = function(pattern) {
           p4 = childrenDeriv cx p3 children
       in endTagDeriv p4
     */
-ValidatorFunctions.prototype.childDeriv = function(context, pattern, childNode) {
-    if (childNode instanceof TextNode) {
-        this.debug("validation of text node", pattern, childNode);
-        return this.textDeriv(context, pattern, childNode.string, childNode);
-    } else if (childNode instanceof ElementNode) {
-        this.debug("beginning validation of childNode", pattern, childNode);
-        let p1 = this.startTagOpenDeriv(pattern, childNode.qName, childNode);
-        this.debug("validation of attributes", p1, childNode);
-        let p2 = this.attsDeriv(childNode.context, p1, cloneArray(childNode.attributeNodes));
-        this.debug("ending validation of childNode", p2, childNode);
-        let p3 = this.startTagCloseDeriv(p2, childNode);
-        this.debug("validation of children nodes", p3, childNode);
-        let p4 = this.childrenDeriv(childNode.context, p3, cloneArray(childNode.childNodes));
-        this.debug("end of validation", p4, childNode);
-        return this.endTagDeriv(p4, childNode);
+    childDeriv(context, pattern, childNode) {
+        if (childNode instanceof TextNode) {
+            this.debug("validation of text node", pattern, childNode);
+            return this.textDeriv(context, pattern, childNode.string, childNode);
+        } else if (childNode instanceof ElementNode) {
+            this.debug("beginning validation of childNode", pattern, childNode);
+            let p1 = this.startTagOpenDeriv(pattern, childNode.qName, childNode);
+            this.debug("validation of attributes", p1, childNode);
+            let p2 = this.attsDeriv(childNode.context, p1, cloneArray(childNode.attributeNodes));
+            this.debug("ending validation of childNode", p2, childNode);
+            let p3 = this.startTagCloseDeriv(p2, childNode);
+            this.debug("validation of children nodes", p3, childNode);
+            let p4 = this.childrenDeriv(childNode.context, p3, cloneArray(childNode.childNodes));
+            this.debug("end of validation", p4, childNode);
+            return this.endTagDeriv(p4, childNode);
+        }
+        throw new Error('Unexpected result for ValidatorFunctions.childDeriv()' + childNode);
     }
-    throw new Error('Unexpected result for ValidatorFunctions.childDeriv()' + childNode);
-};
 
     /*
     textDeriv :: Context -> Pattern -> String -> Pattern
@@ -138,78 +138,78 @@ ValidatorFunctions.prototype.childDeriv = function(context, pattern, childNode) 
       if nullable (listDeriv cx p (words s)) then Empty else NotAllowed
     textDeriv _ _ _ = NotAllowed
     */
-ValidatorFunctions.prototype.textDeriv = function(context, pattern, string, childNode) {
-    let choice1, choice2, group1;
-    if (pattern instanceof Choice) {
-        choice1 = this.textDeriv(context, pattern.pattern1, string, childNode);
-        choice2 = this.textDeriv(context, pattern.pattern2, string, childNode);
-        return this.choice(choice1, choice2);
-    } else if (pattern instanceof Interleave) {
-        choice1 = this.interleave(this.textDeriv(context, pattern.pattern1, string, childNode), pattern.pattern2);
-        choice2 = this.interleave(pattern.pattern1, this.textDeriv(context, pattern.pattern2, string, childNode));
-        return this.choice(choice1, choice2);
-    } else if (pattern instanceof Group) {
-        group1 = this.textDeriv(context, pattern.pattern1, string, childNode);
-        let p = this.group(group1, pattern.pattern2);
-        if (this.nullable(pattern.pattern1)) {
-            choice2 = this.textDeriv(context, pattern.pattern1, string, childNode);
-            return this.choice(p, choice2);
+    textDeriv(context, pattern, string, childNode) {
+        let choice1, choice2, group1;
+        if (pattern instanceof Choice) {
+            choice1 = this.textDeriv(context, pattern.pattern1, string, childNode);
+            choice2 = this.textDeriv(context, pattern.pattern2, string, childNode);
+            return this.choice(choice1, choice2);
+        } else if (pattern instanceof Interleave) {
+            choice1 = this.interleave(this.textDeriv(context, pattern.pattern1, string, childNode), pattern.pattern2);
+            choice2 = this.interleave(pattern.pattern1, this.textDeriv(context, pattern.pattern2, string, childNode));
+            return this.choice(choice1, choice2);
+        } else if (pattern instanceof Group) {
+            group1 = this.textDeriv(context, pattern.pattern1, string, childNode);
+            let p = this.group(group1, pattern.pattern2);
+            if (this.nullable(pattern.pattern1)) {
+                choice2 = this.textDeriv(context, pattern.pattern1, string, childNode);
+                return this.choice(p, choice2);
+            } else {
+                return p;
+            }
+        } else if (pattern instanceof After) {
+            let after1 = this.textDeriv(context, pattern.pattern1, string, childNode);
+            return this.after(after1, pattern.pattern2);
+        } else if (pattern instanceof OneOrMore) {
+            group1 = this.textDeriv(context, pattern.pattern, string, childNode);
+            let group2 = this.choice(pattern, new Empty());
+            return this.group(group1, group2);
+        } else if (pattern instanceof Text) {
+            return pattern;
+        } else if (pattern instanceof Value) {
+            return this.datatypeEqual(pattern.datatype, pattern.string, pattern.context, string, context);
+        } else if (pattern instanceof Data) {
+            return this.datatypeAllows(pattern.datatype, pattern.paramList, string, context);
+        } else if (pattern instanceof DataExcept) {
+            let datatypeAllowed = this.datatypeAllows(pattern.datatype, pattern.paramList, string, context);
+            if (datatypeAllowed instanceof Empty && !this.nullable(this.textDeriv(context, pattern.pattern, string, childNode))) {
+                return new Empty();
+            } else {
+                return new NotAllowed("data invalid, found [" + string + "]", pattern, childNode);
+            }
+        } else if (pattern instanceof List) {
+            let listDeriv = this.listDeriv(context, pattern.pattern, this.words(string), childNode);
+            if (this.nullable(listDeriv, childNode)) {
+                return new Empty();
+            } else {
+                return new NotAllowed("list invalid, found [" + string + "]", pattern, childNode);
+            }
+        } else if (pattern instanceof NotAllowed) {
+            return pattern;
         } else {
-            return p;
+            return new NotAllowed("invalid pattern", pattern, childNode);
         }
-    } else if (pattern instanceof After) {
-        let after1 = this.textDeriv(context, pattern.pattern1, string, childNode);
-        return this.after(after1, pattern.pattern2);
-    } else if (pattern instanceof OneOrMore) {
-        group1 = this.textDeriv(context, pattern.pattern, string, childNode);
-        let group2 = this.choice(pattern, new Empty());
-        return this.group(group1, group2);
-    } else if (pattern instanceof Text) {
-        return pattern;
-    } else if (pattern instanceof Value) {
-        return this.datatypeEqual(pattern.datatype, pattern.string, pattern.context, string, context);
-    } else if (pattern instanceof Data) {
-        return this.datatypeAllows(pattern.datatype, pattern.paramList, string, context);
-    } else if (pattern instanceof DataExcept) {
-        let datatypeAllowed = this.datatypeAllows(pattern.datatype, pattern.paramList, string, context);
-        if (datatypeAllowed instanceof Empty && !this.nullable(this.textDeriv(context, pattern.pattern, string, childNode))) {
-            return new Empty();
-        } else {
-            return new NotAllowed("data invalid, found [" + string + "]", pattern, childNode);
-        }
-    } else if (pattern instanceof List) {
-        let listDeriv = this.listDeriv(context, pattern.pattern, this.words(string), childNode);
-        if (this.nullable(listDeriv, childNode)) {
-            return new Empty();
-        } else {
-            return new NotAllowed("list invalid, found [" + string + "]", pattern, childNode);
-        }
-    } else if (pattern instanceof NotAllowed) {
-        return pattern;
-    } else {
-        return new NotAllowed("invalid pattern", pattern, childNode);
     }
-};
 
     /*
     reverse the order of the array in order to use the function pop()
     */
-ValidatorFunctions.prototype.words = function(string) {
-    return string.split(/\s+/).reverse();
-};
+    words(string) {
+        return string.split(/\s+/).reverse();
+    }
 
     /*
     listDeriv :: Context -> Pattern -> [String] -> Pattern
     listDeriv _ p [] = p
     listDeriv cx p (h:t) = listDeriv cx (textDeriv cx p h) t
     */
-ValidatorFunctions.prototype.listDeriv = function(context, pattern, strings, childNode) {
-    if (strings.length === 0) {
-        return pattern;
-    } else {
-        return this.listDeriv(context, this.textDeriv(context, pattern, strings.pop(), childNode), strings);
+    listDeriv(context, pattern, strings, childNode) {
+        if (strings.length === 0) {
+            return pattern;
+        } else {
+            return this.listDeriv(context, this.textDeriv(context, pattern, strings.pop(), childNode), strings);
+        }
     }
-};
 
     /*
     choice :: Pattern -> Pattern -> Pattern
@@ -217,26 +217,26 @@ ValidatorFunctions.prototype.listDeriv = function(context, pattern, strings, chi
     choice NotAllowed p = p
     choice p1 p2 = Choice p1 p2
     */
-ValidatorFunctions.prototype.choice = function(pattern1, pattern2) {
-    // in that case choose between NotAllowed according to their priority
-    if (pattern1 instanceof NotAllowed && pattern2 instanceof NotAllowed) {
-        if (!pattern1.priority) {
-            return pattern2;
-        } else if (!pattern2.priority) {
+    choice(pattern1, pattern2) {
+        // in that case choose between NotAllowed according to their priority
+        if (pattern1 instanceof NotAllowed && pattern2 instanceof NotAllowed) {
+            if (!pattern1.priority) {
+                return pattern2;
+            } else if (!pattern2.priority) {
+                return pattern1;
+            }
+            if (pattern1.priority < pattern2.priority) {
+                return pattern2;
+            }
             return pattern1;
-        }
-        if (pattern1.priority < pattern2.priority) {
+        } else if (pattern2 instanceof NotAllowed) {
+            return pattern1;
+        } else if (pattern1 instanceof NotAllowed) {
             return pattern2;
+        } else {
+            return new Choice(pattern1, pattern2);
         }
-        return pattern1;
-    } else if (pattern2 instanceof NotAllowed) {
-        return pattern1;
-    } else if (pattern1 instanceof NotAllowed) {
-        return pattern2;
-    } else {
-        return new Choice(pattern1, pattern2);
     }
-};
 
     /*
     group :: Pattern -> Pattern -> Pattern
@@ -246,19 +246,19 @@ ValidatorFunctions.prototype.choice = function(pattern1, pattern2) {
     group Empty p = p
     group p1 p2 = Group p1 p2
     */
-ValidatorFunctions.prototype.group = function(pattern1, pattern2) {
-    if (pattern1 instanceof NotAllowed) {
-        return pattern1;
-    } else if (pattern2 instanceof NotAllowed) {
-        return pattern2;
-    } else if (pattern2 instanceof Empty) {
-        return pattern1;
-    } else if (pattern1 instanceof Empty) {
-        return pattern2;
-    } else {
-        return new Group(pattern1, pattern2);
+    group(pattern1, pattern2) {
+        if (pattern1 instanceof NotAllowed) {
+            return pattern1;
+        } else if (pattern2 instanceof NotAllowed) {
+            return pattern2;
+        } else if (pattern2 instanceof Empty) {
+            return pattern1;
+        } else if (pattern1 instanceof Empty) {
+            return pattern2;
+        } else {
+            return new Group(pattern1, pattern2);
+        }
     }
-};
 
     /*
     interleave :: Pattern -> Pattern -> Pattern
@@ -268,19 +268,19 @@ ValidatorFunctions.prototype.group = function(pattern1, pattern2) {
     interleave Empty p = p
     interleave p1 p2 = Interleave p1 p2
     */
-ValidatorFunctions.prototype.interleave = function(pattern1, pattern2) {
-    if (pattern1 instanceof NotAllowed) {
-        return pattern1;
-    } else if (pattern2 instanceof NotAllowed) {
-        return pattern2;
-    } else if (pattern2 instanceof Empty) {
-        return pattern1;
-    } else if (pattern1 instanceof Empty) {
-        return pattern2;
-    } else {
-        return new Interleave(pattern1, pattern2);
+    interleave(pattern1, pattern2) {
+        if (pattern1 instanceof NotAllowed) {
+            return pattern1;
+        } else if (pattern2 instanceof NotAllowed) {
+            return pattern2;
+        } else if (pattern2 instanceof Empty) {
+            return pattern1;
+        } else if (pattern1 instanceof Empty) {
+            return pattern2;
+        } else {
+            return new Interleave(pattern1, pattern2);
+        }
     }
-};
 
     /*
     after :: Pattern -> Pattern -> Pattern
@@ -288,70 +288,70 @@ ValidatorFunctions.prototype.interleave = function(pattern1, pattern2) {
     after NotAllowed p = NotAllowed
     after p1 p2 = After p1 p2
     */
-ValidatorFunctions.prototype.after = function(pattern1, pattern2) {
-    if (pattern2 instanceof NotAllowed) {
-        return pattern2;
-    } else if (pattern1 instanceof NotAllowed) {
-        return pattern1;
-    } else {
-        return new After(pattern1, pattern2);
+    after(pattern1, pattern2) {
+        if (pattern2 instanceof NotAllowed) {
+            return pattern2;
+        } else if (pattern1 instanceof NotAllowed) {
+            return pattern1;
+        } else {
+            return new After(pattern1, pattern2);
+        }
     }
-};
 
     /*
     datatypeAllows :: Datatype -> ParamList -> String -> Context -> Bool
     datatypeAllows ("",  "string") [] _ _ = True
     datatypeAllows ("",  "token") [] _ _ = True
     */
-ValidatorFunctions.prototype.datatypeAllows = function(datatype, paramList, string, context) {
-    if (datatype.uri == "") {
-        if (datatype.localName === "string" && paramList.length === 0) {
-            return new Empty();
-        } else if (datatype.localName === "token" && paramList.length === 0) {
+    datatypeAllows(datatype, paramList, string, context) {
+        if (datatype.uri == "") {
+            if (datatype.localName === "string" && paramList.length === 0) {
+                return new Empty();
+            } else if (datatype.localName === "token" && paramList.length === 0) {
+                return new Empty();
+            } else {
+                return new NotAllowed("datatype uri is not specified", datatype, string);
+            }
+        } else if (!this.datatypeLibrary) {
             return new Empty();
         } else {
-            return new NotAllowed("datatype uri is not specified", datatype, string);
+            return this.datatypeLibrary.datatypeAllows(datatype, paramList, string, context);
         }
-    } else if (!this.datatypeLibrary) {
-        return new Empty();
-    } else {
-        return this.datatypeLibrary.datatypeAllows(datatype, paramList, string, context);
     }
-};
 
     /*
     datatypeEqual :: Datatype -> String -> Context -> String -> Context -> Bool
     datatypeEqual ("",  "string") s1 _ s2 _ = (s1 == s2)
     datatypeEqual ("",  "token") s1 _ s2 _ = (normalizeWhitespace s1) == (normalizeWhitespace s2)
     */
-ValidatorFunctions.prototype.datatypeEqual = function(datatype, string1, context1, string2, context2) {
-    if (datatype.uri == "") {
-        if (datatype.localName == "string") {
-            if (string1 == string2) {
-                return new Empty();
-            } else {
-                return new NotAllowed("strings are not equals", datatype, string2);
+    datatypeEqual(datatype, string1, context1, string2, context2) {
+        if (datatype.uri == "") {
+            if (datatype.localName == "string") {
+                if (string1 == string2) {
+                    return new Empty();
+                } else {
+                    return new NotAllowed("strings are not equals", datatype, string2);
+                }
+            } else if (datatype.localName == "token") {
+                if (this.normalizeWhitespace(string1) == this.normalizeWhitespace(string2)) {
+                    return new Empty();
+                } else {
+                    return new NotAllowed("strings are not equals", datatype, string2);
+                }
             }
-        } else if (datatype.localName == "token") {
-            if (this.normalizeWhitespace(string1) == this.normalizeWhitespace(string2)) {
-                return new Empty();
-            } else {
-                return new NotAllowed("strings are not equals", datatype, string2);
-            }
+        } else if (!this.datatypeLibrary) {
+            return new Empty();
         }
-    } else if (!this.datatypeLibrary) {
-        return new Empty();
+        return this.datatypeLibrary.datatypeEqual(datatype, string1, context1, string2, context2);
     }
-    return this.datatypeLibrary.datatypeEqual(datatype, string1, context1, string2, context2);
-};
 
     /*
     normalizeWhitespace :: String -> String
     normalizeWhitespace s = unwords (words s)
     */
-ValidatorFunctions.prototype.normalizeWhitespace = function(string) {
-    return string.split(/\s+/).join(" ");
-};
+    normalizeWhitespace(string) {
+        return string.split(/\s+/).join(" ");
+    }
 
     /*
     applyAfter :: (Pattern -> Pattern) -> Pattern -> Pattern
@@ -359,16 +359,16 @@ ValidatorFunctions.prototype.normalizeWhitespace = function(string) {
     applyAfter f (Choice p1 p2) = choice (applyAfter f p1) (applyAfter f p2)
     applyAfter f NotAllowed = NotAllowed
     */
-ValidatorFunctions.prototype.applyAfter = function(funct, pattern) {
-    if (pattern instanceof After) {
-        return this.after(pattern.pattern1, funct.apply(pattern.pattern2));
-    } else if (pattern instanceof Choice) {
-        return this.choice(this.applyAfter(funct, pattern.pattern1), this.applyAfter(funct, pattern.pattern2));
-    } else if (pattern instanceof NotAllowed) {
-        return pattern;
+    applyAfter(funct, pattern) {
+        if (pattern instanceof After) {
+            return this.after(pattern.pattern1, funct.apply(pattern.pattern2));
+        } else if (pattern instanceof Choice) {
+            return this.choice(this.applyAfter(funct, pattern.pattern1), this.applyAfter(funct, pattern.pattern2));
+        } else if (pattern instanceof NotAllowed) {
+            return pattern;
+        }
+        throw new Error('Unexpected result for ValidatorFunctions.applyAfter() ' + pattern);
     }
-    throw new Error('Unexpected result for ValidatorFunctions.applyAfter() ' + pattern);
-};
 
     /*
     startTagOpenDeriv :: Pattern -> QName -> Pattern
@@ -391,79 +391,60 @@ ValidatorFunctions.prototype.applyAfter = function(funct, pattern) {
       applyAfter (flip after p2) (startTagOpenDeriv p1 qn)
     startTagOpenDeriv _ qn = NotAllowed
     */
-ValidatorFunctions.prototype.startTagOpenDeriv = function(pattern, qName, childNode) {
-    let choice1, choice2, p1Deriv, p2Deriv;
-    if (pattern instanceof Choice) {
-        choice1 = this.startTagOpenDeriv(pattern.pattern1, qName, childNode);
-        choice2 = this.startTagOpenDeriv(pattern.pattern2, qName, childNode);
-        return this.choice(choice1, choice2);
-    } else if (pattern instanceof Element) {
-        if (this.contains(pattern.nameClass, qName)) {
-            return this.after(pattern.pattern, new Empty());
-        } else {
-            return new NotAllowed("invalid tag name", pattern.nameClass, qName);
-        }
-    } else if (pattern instanceof Interleave) {
-        p1Deriv = this.startTagOpenDeriv(pattern.pattern1, qName, childNode);
-        choice1 = this.applyAfter(new flip(this.interleave, pattern.pattern2), p1Deriv);
-        p2Deriv = this.startTagOpenDeriv(pattern.pattern2, qName, childNode);
-        choice2 = this.applyAfter(new notFlip(this.interleave, pattern.pattern1), p2Deriv);
-        return this.choice(choice1, choice2);
-    } else if (pattern instanceof OneOrMore) {
-        let pDeriv = this.startTagOpenDeriv(pattern.pattern, qName, childNode);
-        return this.applyAfter(new flip(this.group, this.choice(pattern, new Empty())), pDeriv);
-    } else if (pattern instanceof Group) {
-        p1Deriv = this.startTagOpenDeriv(pattern.pattern1, qName, childNode);
-        let x = this.applyAfter(new flip(this.group, pattern.pattern2), p1Deriv);
-        if (this.nullable(pattern.pattern1)) {
+    startTagOpenDeriv(pattern, qName, childNode) {
+        let choice1, choice2, p1Deriv, p2Deriv;
+        if (pattern instanceof Choice) {
+            choice1 = this.startTagOpenDeriv(pattern.pattern1, qName, childNode);
+            choice2 = this.startTagOpenDeriv(pattern.pattern2, qName, childNode);
+            return this.choice(choice1, choice2);
+        } else if (pattern instanceof Element) {
+            if (this.contains(pattern.nameClass, qName)) {
+                return this.after(pattern.pattern, new Empty());
+            } else {
+                return new NotAllowed("invalid tag name", pattern.nameClass, qName);
+            }
+        } else if (pattern instanceof Interleave) {
+            p1Deriv = this.startTagOpenDeriv(pattern.pattern1, qName, childNode);
+            choice1 = this.applyAfter(new flip(this.interleave, pattern.pattern2), p1Deriv);
             p2Deriv = this.startTagOpenDeriv(pattern.pattern2, qName, childNode);
-            return this.choice(x, p2Deriv);
+            choice2 = this.applyAfter(new notFlip(this.interleave, pattern.pattern1), p2Deriv);
+            return this.choice(choice1, choice2);
+        } else if (pattern instanceof OneOrMore) {
+            let pDeriv = this.startTagOpenDeriv(pattern.pattern, qName, childNode);
+            return this.applyAfter(new flip(this.group, this.choice(pattern, new Empty())), pDeriv);
+        } else if (pattern instanceof Group) {
+            p1Deriv = this.startTagOpenDeriv(pattern.pattern1, qName, childNode);
+            let x = this.applyAfter(new flip(this.group, pattern.pattern2), p1Deriv);
+            if (this.nullable(pattern.pattern1)) {
+                p2Deriv = this.startTagOpenDeriv(pattern.pattern2, qName, childNode);
+                return this.choice(x, p2Deriv);
+            } else {
+                return x;
+            }
+        } else if (pattern instanceof After) {
+            p1Deriv = this.startTagOpenDeriv(pattern.pattern1, qName, childNode);		
+            return this.applyAfter(new flip(this.after, pattern.pattern2), p1Deriv);
+        } else if (pattern instanceof NotAllowed) {
+            return pattern;
         } else {
-            return x;
+            return new NotAllowed("invalid pattern", pattern, childNode);
         }
-    } else if (pattern instanceof After) {
-        p1Deriv = this.startTagOpenDeriv(pattern.pattern1, qName, childNode);		
-        return this.applyAfter(new flip(this.after, pattern.pattern2), p1Deriv);
-    } else if (pattern instanceof NotAllowed) {
-        return pattern;
-    } else {
-        return new NotAllowed("invalid pattern", pattern, childNode);
     }
-};
-
-    /*
-    We make use of the standard Haskell function flip  which flips the order of the arguments of a function of two arguments. Thus,  flip applied to a function of two arguments f and an argument x returns a function of one argument g such that g(y) = f(y,  x). 
-    */
-function flip(funct, arg2) {
-    this.funct = funct;
-    this.arg2 = arg2;
-}
-flip.prototype.apply = function(arg1) {
-    return this.funct(arg1, this.arg2);
-};
-
-function notFlip(funct, arg1) {
-    this.funct = funct;
-    this.arg1 = arg1;
-}
-notFlip.prototype.apply = function(arg2) {
-    return this.funct(this.arg1, arg2);
-};
 
     /*
     attsDeriv :: Context -> Pattern -> [AttributeNode] -> Pattern
     attsDeriv cx p [] = p
     attsDeriv cx p ((AttributeNode qn s):t) = attsDeriv cx (attDeriv cx p (AttributeNode qn s)) t
     */
-ValidatorFunctions.prototype.attsDeriv = function(context, pattern, attributeNodes) {
-    if (attributeNodes.length === 0) {
-        return pattern;
-    } else {
-        let attDerivResult = this.attDeriv(context, pattern, attributeNodes.pop());
-        let attsDerivResult = this.attsDeriv(context, attDerivResult, attributeNodes);
-        return attsDerivResult;
+    attsDeriv(context, pattern, attributeNodes) {
+        if (attributeNodes.length === 0) {
+            return pattern;
+        } else {
+            let attDerivResult = this.attDeriv(context, pattern, attributeNodes.pop());
+            let attsDerivResult = this.attsDeriv(context, attDerivResult, attributeNodes);
+            return attsDerivResult;
+        }
     }
-};
 
     /*
     attDeriv :: Context -> Pattern -> AttributeNode -> Pattern
@@ -483,67 +464,67 @@ ValidatorFunctions.prototype.attsDeriv = function(context, pattern, attributeNod
       if contains nc qn && valueMatch cx p s then Empty else NotAllowed
     attDeriv _ _ _ = NotAllowed
     */
-ValidatorFunctions.prototype.attDeriv = function(context, pattern, attributeNode) {
-    let choice1, choice2, attDeriv1, attDeriv2;
-    if (pattern instanceof After) {
-        var attDerivResult = this.attDeriv(context, pattern.pattern1, attributeNode);
-        return this.after(attDerivResult, pattern.pattern2);
-    } else if (pattern instanceof Choice) {
-        choice1 = this.attDeriv(context, pattern.pattern1, attributeNode);
-        choice2 = this.attDeriv(context, pattern.pattern2, attributeNode);
-        return this.choice(choice1, choice2);
-    } else if (pattern instanceof Group) {
-        attDeriv1 = this.attDeriv(context, pattern.pattern1, attributeNode);
-        choice1 = this.group(attDeriv1, pattern.pattern2);
-        attDeriv2 = this.attDeriv(context, pattern.pattern2, attributeNode);
-        choice2 = this.group(pattern.pattern1, attDeriv2);
-        return this.choice(choice1, choice2);
-    } else if (pattern instanceof Interleave) {
-        attDeriv1 = this.attDeriv(context, pattern.pattern1, attributeNode);
-        choice1 = this.interleave(attDeriv1, pattern.pattern2);
-        attDeriv2 = this.attDeriv(context, pattern.pattern2, attributeNode);
-        choice2 = this.interleave(pattern.pattern1, attDeriv2);
-        return this.choice(choice1, choice2);
-    } else if (pattern instanceof OneOrMore) {
-        attDerivResult = this.attDeriv(context, pattern.pattern, attributeNode);
-        return this.group(attDerivResult, this.choice(pattern.pattern, new Empty()));
-    } else if (pattern instanceof Attribute) {
-        let attributeNameCheck = this.contains(pattern.nameClass, attributeNode.qName);
-        if (attributeNameCheck) {
-            let valueMatched = this.valueMatch(context, pattern.pattern, attributeNode.string, attributeNode);
-            // AUGMENTATION : the AttributeNode is typed
-            if (valueMatched instanceof Empty && (pattern.pattern instanceof Data || pattern.pattern instanceof DataExcept)) {
-                attributeNode.setType(pattern.pattern.datatype.localName);
+    attDeriv(context, pattern, attributeNode) {
+        let choice1, choice2, attDeriv1, attDeriv2;
+        if (pattern instanceof After) {
+            var attDerivResult = this.attDeriv(context, pattern.pattern1, attributeNode);
+            return this.after(attDerivResult, pattern.pattern2);
+        } else if (pattern instanceof Choice) {
+            choice1 = this.attDeriv(context, pattern.pattern1, attributeNode);
+            choice2 = this.attDeriv(context, pattern.pattern2, attributeNode);
+            return this.choice(choice1, choice2);
+        } else if (pattern instanceof Group) {
+            attDeriv1 = this.attDeriv(context, pattern.pattern1, attributeNode);
+            choice1 = this.group(attDeriv1, pattern.pattern2);
+            attDeriv2 = this.attDeriv(context, pattern.pattern2, attributeNode);
+            choice2 = this.group(pattern.pattern1, attDeriv2);
+            return this.choice(choice1, choice2);
+        } else if (pattern instanceof Interleave) {
+            attDeriv1 = this.attDeriv(context, pattern.pattern1, attributeNode);
+            choice1 = this.interleave(attDeriv1, pattern.pattern2);
+            attDeriv2 = this.attDeriv(context, pattern.pattern2, attributeNode);
+            choice2 = this.interleave(pattern.pattern1, attDeriv2);
+            return this.choice(choice1, choice2);
+        } else if (pattern instanceof OneOrMore) {
+            attDerivResult = this.attDeriv(context, pattern.pattern, attributeNode);
+            return this.group(attDerivResult, this.choice(pattern.pattern, new Empty()));
+        } else if (pattern instanceof Attribute) {
+            let attributeNameCheck = this.contains(pattern.nameClass, attributeNode.qName);
+            if (attributeNameCheck) {
+                let valueMatched = this.valueMatch(context, pattern.pattern, attributeNode.string, attributeNode);
+                // AUGMENTATION : the AttributeNode is typed
+                if (valueMatched instanceof Empty && (pattern.pattern instanceof Data || pattern.pattern instanceof DataExcept)) {
+                    attributeNode.setType(pattern.pattern.datatype.localName);
+                }
+                return valueMatched;
+            } else {
+                return new NotAllowed("invalid attribute", pattern, attributeNode);
             }
-            return valueMatched;
+        } else if (pattern instanceof NotAllowed) {
+            return pattern;
         } else {
-            return new NotAllowed("invalid attribute", pattern, attributeNode);
+            return new NotAllowed("invalid attributeNode", pattern, attributeNode);
         }
-    } else if (pattern instanceof NotAllowed) {
-        return pattern;
-    } else {
-        return new NotAllowed("invalid attributeNode", pattern, attributeNode);
     }
-};
 
     /*
     valueMatch :: Context -> Pattern -> String -> Bool
     valueMatch cx p s = (nullable p && whitespace s) || nullable (textDeriv cx p s)
     */
-ValidatorFunctions.prototype.valueMatch = function(context, pattern, string, childNode) {
-    let nullable = this.nullable(pattern);
-    let isWhitespace = this.whitespace(string);
-    if (nullable && isWhitespace) {
-        return true;
+    valueMatch(context, pattern, string, childNode) {
+        let nullable = this.nullable(pattern);
+        let isWhitespace = this.whitespace(string);
+        if (nullable && isWhitespace) {
+            return true;
+        }
+        let textDerivResult = this.textDeriv(context, pattern, string, childNode);
+        //in order to keep original NotAllowed pattern
+        if (this.nullable(textDerivResult)) {
+            return new Empty();
+        } else {
+            return textDerivResult;
+        }
     }
-    let textDerivResult = this.textDeriv(context, pattern, string, childNode);
-    //in order to keep original NotAllowed pattern
-    if (this.nullable(textDerivResult)) {
-        return new Empty();
-    } else {
-        return textDerivResult;
-    }
-};
 
     /*
     startTagCloseDeriv :: Pattern -> Pattern
@@ -560,46 +541,46 @@ ValidatorFunctions.prototype.valueMatch = function(context, pattern, string, chi
     startTagCloseDeriv (Attribute _ _) = NotAllowed
     startTagCloseDeriv p = p
     */
-ValidatorFunctions.prototype.startTagCloseDeriv = function(pattern, childNode) {
-    if (pattern instanceof After) {
-        return this.after(this.startTagCloseDeriv(pattern.pattern1, childNode), pattern.pattern2);
-    } else if (pattern instanceof Choice) {
-        let choice1 = this.startTagCloseDeriv(pattern.pattern1, childNode);
-        let choice2 = this.startTagCloseDeriv(pattern.pattern2, childNode);
-        return this.choice(choice1, choice2);
-    } else if (pattern instanceof Group) {
-        let group1 = this.startTagCloseDeriv(pattern.pattern1, childNode);
-        let group2 = this.startTagCloseDeriv(pattern.pattern2, childNode);
-        return this.group(group1, group2);
-    } else if (pattern instanceof Interleave) {
-        let interleave1 = this.startTagCloseDeriv(pattern.pattern1, childNode);
-        let interleave2 = this.startTagCloseDeriv(pattern.pattern2, childNode);
-        return this.interleave(interleave1, interleave2);
-    } else if (pattern instanceof OneOrMore) {
-        return this.oneOrMore(this.startTagCloseDeriv(pattern.pattern, childNode));
-    } else if (pattern instanceof Attribute) {
-        // AUGMENTATION : if defaultValue is provided then it is optional, and it must be augmented
-        if (pattern.defaultValue && childNode instanceof ElementNode && pattern.nameClass instanceof Name) {
-            childNode.addAttribute(pattern);
+    startTagCloseDeriv(pattern, childNode) {
+        if (pattern instanceof After) {
+            return this.after(this.startTagCloseDeriv(pattern.pattern1, childNode), pattern.pattern2);
+        } else if (pattern instanceof Choice) {
+            let choice1 = this.startTagCloseDeriv(pattern.pattern1, childNode);
+            let choice2 = this.startTagCloseDeriv(pattern.pattern2, childNode);
+            return this.choice(choice1, choice2);
+        } else if (pattern instanceof Group) {
+            let group1 = this.startTagCloseDeriv(pattern.pattern1, childNode);
+            let group2 = this.startTagCloseDeriv(pattern.pattern2, childNode);
+            return this.group(group1, group2);
+        } else if (pattern instanceof Interleave) {
+            let interleave1 = this.startTagCloseDeriv(pattern.pattern1, childNode);
+            let interleave2 = this.startTagCloseDeriv(pattern.pattern2, childNode);
+            return this.interleave(interleave1, interleave2);
+        } else if (pattern instanceof OneOrMore) {
+            return this.oneOrMore(this.startTagCloseDeriv(pattern.pattern, childNode));
+        } else if (pattern instanceof Attribute) {
+            // AUGMENTATION : if defaultValue is provided then it is optional, and it must be augmented
+            if (pattern.defaultValue && childNode instanceof ElementNode && pattern.nameClass instanceof Name) {
+                childNode.addAttribute(pattern);
+            }
+            return new NotAllowed("attribute missing", pattern, childNode);
+        } else {
+            return pattern;
         }
-        return new NotAllowed("attribute missing", pattern, childNode);
-    } else {
-        return pattern;
     }
-};
 
     /*
     oneOrMore :: Pattern -> Pattern
     oneOrMore NotAllowed = NotAllowed
     oneOrMore p = OneOrMore p
     */
-ValidatorFunctions.prototype.oneOrMore = function(pattern) {
-    if (pattern instanceof NotAllowed) {
-        return pattern;
-    } else {
-        return new OneOrMore(pattern);
+    oneOrMore(pattern) {
+        if (pattern instanceof NotAllowed) {
+            return pattern;
+        } else {
+            return new OneOrMore(pattern);
+        }
     }
-};
 
     /*
     childrenDeriv :: Context -> Pattern -> [ChildNode] -> Pattern
@@ -609,61 +590,61 @@ ValidatorFunctions.prototype.oneOrMore = function(pattern) {
         in if whitespace s then choice p p1 else p1
     childrenDeriv cx p children = stripChildrenDeriv cx p children
     */
-ValidatorFunctions.prototype.childrenDeriv = function(context, pattern, childNodes) {
-    if (childNodes.length === 0) {
-        return pattern;
-    } else if (childNodes.length === 1 && childNodes[0] instanceof TextNode) {
-        let p1 = this.childDeriv(context, pattern, childNodes[0]);
-        if (this.whitespace(childNodes[0].string)) {
-            return this.choice(pattern, p1);
+    childrenDeriv(context, pattern, childNodes) {
+        if (childNodes.length === 0) {
+            return pattern;
+        } else if (childNodes.length === 1 && childNodes[0] instanceof TextNode) {
+            let p1 = this.childDeriv(context, pattern, childNodes[0]);
+            if (this.whitespace(childNodes[0].string)) {
+                return this.choice(pattern, p1);
+            } else {
+                return p1;
+            }
         } else {
-            return p1;
+            //in order to use pop(), reverse the order of the children
+            return this.stripChildrenDeriv(context, pattern, childNodes.reverse());
         }
-    } else {
-        //in order to use pop(), reverse the order of the children
-        return this.stripChildrenDeriv(context, pattern, childNodes.reverse());
     }
-};
 
     /*
     stripChildrenDeriv :: Context -> Pattern -> [ChildNode] -> Pattern
     stripChildrenDeriv _ p [] = p
     stripChildrenDeriv cx p (h:t) = stripChildrenDeriv cx (if strip h then p else (childDeriv cx p h)) t
     */
-ValidatorFunctions.prototype.stripChildrenDeriv = function(context, pattern, childNodes) {
-    if (childNodes.length === 0) {
-        return pattern;
-    } else {
-        let p = pattern;
-        let childNodesCloned = cloneArray(childNodes);
-        let childNode = childNodesCloned.pop();
-        if (!this.strip(childNode)) {
-            p = this.childDeriv(context, p, childNode);
+    stripChildrenDeriv(context, pattern, childNodes) {
+        if (childNodes.length === 0) {
+            return pattern;
+        } else {
+            let p = pattern;
+            let childNodesCloned = cloneArray(childNodes);
+            let childNode = childNodesCloned.pop();
+            if (!this.strip(childNode)) {
+                p = this.childDeriv(context, p, childNode);
+            }
+            return this.stripChildrenDeriv(context, p, childNodesCloned);
         }
-        return this.stripChildrenDeriv(context, p, childNodesCloned);
     }
-};
-    
+
     /*
     strip :: ChildNode -> Bool
     strip (TextNode s) = whitespace s
     strip _ = False
     */
-ValidatorFunctions.prototype.strip = function(childNode) {
-    if (childNode instanceof TextNode) {
-        return this.whitespace(childNode.string);
-    } else {
-        return false;
+    strip(childNode) {
+        if (childNode instanceof TextNode) {
+            return this.whitespace(childNode.string);
+        } else {
+            return false;
+        }
     }
-};
-    
+
     /*
     whitespace :: String -> Bool
     whitespace s = all isSpace s
     */
-ValidatorFunctions.prototype.whitespace = function(string) {
-    return !(/[^\t\n\r ]/.test(string));
-};
+    whitespace(string) {
+        return !(/[^\t\n\r ]/.test(string));
+    }
 
     /*
     endTagDeriv :: Pattern -> Pattern
@@ -671,20 +652,46 @@ ValidatorFunctions.prototype.whitespace = function(string) {
     endTagDeriv (After p1 p2) = if nullable p1 then p2 else NotAllowed
     endTagDeriv _ = NotAllowed
     */
-ValidatorFunctions.prototype.endTagDeriv = function(pattern, childNode) {
-    if (pattern instanceof Choice) {
-        let choice1 = this.endTagDeriv(pattern.pattern1, childNode);
-        let choice2 = this.endTagDeriv(pattern.pattern2, childNode);
-        return this.choice(choice1, choice2);
-    } else if (pattern instanceof After) {
-        if (this.nullable(pattern.pattern1)) {
-            return pattern.pattern2;
+    endTagDeriv(pattern, childNode) {
+        if (pattern instanceof Choice) {
+            let choice1 = this.endTagDeriv(pattern.pattern1, childNode);
+            let choice2 = this.endTagDeriv(pattern.pattern2, childNode);
+            return this.choice(choice1, choice2);
+        } else if (pattern instanceof After) {
+            if (this.nullable(pattern.pattern1)) {
+                return pattern.pattern2;
+            } else {
+                return new MissingContent("missing content", pattern.pattern1, childNode);
+            }
+        } else if (pattern instanceof NotAllowed) {
+            return pattern;
         } else {
-            return new MissingContent("missing content", pattern.pattern1, childNode);
+            return new NotAllowed("invalid pattern", pattern, childNode);
         }
-    } else if (pattern instanceof NotAllowed) {
-        return pattern;
-    } else {
-        return new NotAllowed("invalid pattern", pattern, childNode);
     }
-};
+}
+
+/*
+We make use of the standard Haskell function flip  which flips the order of the arguments of a function of two arguments. Thus,  flip applied to a function of two arguments f and an argument x returns a function of one argument g such that g(y) = f(y,  x). 
+*/
+class flip {
+    constructor(funct, arg2) {
+        this.funct = funct;
+        this.arg2 = arg2;
+    }
+
+    apply(arg1) {
+        return this.funct(arg1, this.arg2);
+    }
+}
+
+class notFlip {
+    constructor(funct, arg1) {
+        this.funct = funct;
+        this.arg1 = arg1;
+    }
+
+    apply(arg2) {
+        return this.funct(this.arg1, arg2);
+    }
+}

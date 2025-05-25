@@ -6,47 +6,59 @@
 // systemId (file URL)); note that resolveEntity() on EntityResolver and also getExternalSubset() on EntityResolver2 return
 // an InputSource and Locator and Locator2 also have notes on InputSource
 
-function InputSource(input) {
-    if (!input) {
-        return;
+class InputSource {
+    constructor(input) {
+        if (!input) {
+            return;
+        }
+        if (typeof input === 'string') {
+            this.systemId = input;
+        }
+        else if (input instanceof InputStream) {
+            this.byteStream = input;
+        }
+        else if (input instanceof Reader) { // Should not have a byte-order mark
+            this.characterStream = input;
+        }
     }
-    if (typeof input === 'string') {
-        this.systemId = input;
+
+    getByteStream() {
+        return this.byteStream || null; // InputStream
     }
-    else if (input instanceof InputStream) {
-        this.byteStream = input;
+
+    getCharacterStream() { // Should apparently not have a byte-order mark (see constructor)
+        return this.characterStream || null; // Reader
     }
-    else if (input instanceof Reader) { // Should not have a byte-order mark
-        this.characterStream = input;
+
+    getEncoding() {
+        return this.encoding || null; // String
+    }
+
+    getPublicId() {
+        return this.publicId || null; // String
+    }
+
+    getSystemId() {
+        return this.systemId || null; // String
+    }
+
+    setByteStream(byteStream) { // InputStream
+        this.byteStream = byteStream;
+    }
+
+    setCharacterStream(characterStream) { // Reader
+        this.characterStream = characterStream;
+    }
+
+    setEncoding(encoding) { // No effect on character stream
+        this.encoding = encoding;
+    }
+
+    setPublicId(publicId) { // String
+        this.publicId = publicId;
+    }
+
+    setSystemId(systemId) { // String
+        this.systemId = systemId;
     }
 }
-InputSource.prototype.getByteStream = function () {
-    return this.byteStream || null; // InputStream
-};
-InputSource.prototype.getCharacterStream = function () { // Should apparently not have a byte-order mark (see constructor)
-    return this.characterStream || null; // Reader
-};
-InputSource.prototype.getEncoding = function () {
-    return this.encoding || null; // String
-};
-InputSource.prototype.getPublicId = function () {
-    return this.publicId || null; // String
-};
-InputSource.prototype.getSystemId = function () {
-    return this.systemId || null; // String
-};
-InputSource.prototype.setByteStream = function (byteStream) { // InputStream
-    this.byteStream = byteStream;
-};
-InputSource.prototype.setCharacterStream = function (characterStream) { // Reader
-    this.characterStream = characterStream;
-};
-InputSource.prototype.setEncoding = function (encoding) { // No effect on character stream
-    this.encoding = encoding;
-};
-InputSource.prototype.setPublicId = function (publicId) { // String
-    this.publicId = publicId;
-};
-InputSource.prototype.setSystemId = function (systemId) { // String
-    this.systemId = systemId;
-};
