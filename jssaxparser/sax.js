@@ -10,14 +10,13 @@ import { DatatypeLibrary } from './jsdatatypelibrary-0.4/datatype_library';
 import { NamespaceSupport } from './NamespaceSupport';
 import { InputSource } from './InputSource';
 import { StringReader } from './Reader';
-import { XMLFilterImpl2 } from './XMLFilterImpls';
+import { XMLFilterImpl, XMLFilterImpl2 } from './XMLFilterImpls';
 import { SAXScanner } from './SAXScanner';
 import { Attributes2Impl, AttributesImpl } from './AttributesImpl';
 import {
     SAXParseException, SAXNotRecognizedException, SAXNotSupportedException, SAXException
 } from './exceptions';
-
-let that = window; // probably window object
+import { Reader } from './Reader';
 
 // NOTES:
 // 1) The following notes might not be perfectly up to date
@@ -37,6 +36,8 @@ let that = window; // probably window object
 //  e) domNode
 
 export class SAXParser {
+    that = window || {}; // probably window object
+
     constructor(
         contentHandler,
         lexicalHandler,
@@ -189,7 +190,7 @@ export class SAXParser {
         // may throw java.io.IOException or SAXException
         let systemId, xmlAsString, path;
         //InputSource may not have been imported
-        if (typeof that.InputSource === 'function' && inputOrSystemId instanceof InputSource) {
+        if (typeof InputSource === 'function' && inputOrSystemId instanceof InputSource) {
             let charStream = inputOrSystemId.getCharacterStream();
             let byteStream = inputOrSystemId.getByteStream();
             // Priority for the parser is characterStream, byteStream, then URI, but we only really implemented the systemId (URI), so we automatically go with that
@@ -866,7 +867,7 @@ export class XMLReaderFactory {
     // PUBLIC API
     static createXMLReader(className) {
         if (className) {
-            return new that[className]();
+            return new this.that[className]();
         }
         return new SAXParser(); // our system default XMLReader (parse() not implemented, however)
     }
@@ -874,29 +875,29 @@ export class XMLReaderFactory {
     // CUSTOM CONVENIENCE METHODS
 
     static getSaxImport() {
-        if (!that.saxImport) {
+        if (!this.that.saxImport) {
             let scripts = document.getElementsByTagName("script");
             for (let i = 0; i < scripts.length; i++) {
                 let script = scripts.item(i);
                 let src = script.getAttribute("src");
                 if (src && src.match("sax.js")) {
-                    that.saxImport = script;
-                    return that.saxImport;
+                    this.that.saxImport = script;
+                    return this.that.saxImport;
                 }
             }
         }
-        return that.saxImport;
+        return this.that.saxImport;
     }
 
     static getJsPath() {
-        if (that.jsPath === undefined) {
+        if (this.that.jsPath === undefined) {
             let scriptTag = XMLReaderFactory.getSaxImport();
             if (scriptTag) {
                 let src = scriptTag.getAttribute("src");
-                that.jsPath = src.substring(0, src.lastIndexOf("/") + 1);
+                this.that.jsPath = src.substring(0, src.lastIndexOf("/") + 1);
             }
         }
-        return that.jsPath;
+        return this.that.jsPath;
     }
 
     static importJS(filename) {
@@ -917,7 +918,7 @@ export class XMLReaderFactory {
     }
 
     static checkDependencies() {
-        if (typeof that.SAXScanner !== 'function') {
+        if (typeof SAXScanner !== 'function') {
             try {
                 this.importJS("SAXScanner.js");
             } catch (e) {
@@ -925,7 +926,7 @@ export class XMLReaderFactory {
             }
         }
         //need an implementation of AttributesImpl
-        if (typeof that.AttributesImpl !== 'function') {
+        if (typeof AttributesImpl !== 'function') {
             try {
                 this.importJS("AttributesImpl.js");
             } catch (e2) {
@@ -933,28 +934,28 @@ export class XMLReaderFactory {
             }
         }
         //also need an implementation of NamespaceSupport
-        if (typeof that.NamespaceSupport !== 'function') {
+        if (typeof NamespaceSupport !== 'function') {
             try {
                 this.importJS("NamespaceSupport.js");
             } catch (e3) {
                 throw new SAXException("implementation of NamespaceSupport, like NamespaceSupport.js, not provided and could not be dynamically loaded because of exception", e3);
             }
         }
-        if (typeof that.XMLFilterImpl !== 'function') {
+        if (typeof XMLFilterImpl !== 'function') {
             try {
                 this.importJS("XMLFilterImpls.js");
             } catch (e4) {
                 throw new SAXException("implementation of XMLFilterImpl, like XMLFilterImpls.js, not provided and could not be dynamically loaded because of exception", e4);
             }
         }
-        if (typeof that.Reader !== 'function') {
+        if (typeof Reader !== 'function') {
             try {
                 this.importJS("Reader.js");
             } catch (e4) {
                 throw new SAXException("implementation of Reader, like Reader.js, not provided and could not be dynamically loaded because of exception", e5);
             }
         }
-        if (typeof that.ReaderWrapper !== 'function') {
+        if (typeof ReaderWrapper !== 'function') {
             try {
                 this.importJS("ReaderWrapper.js");
             } catch (e4) {

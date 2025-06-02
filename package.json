@@ -1,6 +1,6 @@
 {
   "name": "@flyskypie/xml-sax-parser",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "module": "./jssaxparser/sax.js",
   "exports": {
     ".": {
